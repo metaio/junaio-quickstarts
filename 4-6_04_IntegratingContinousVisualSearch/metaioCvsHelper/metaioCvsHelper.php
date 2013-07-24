@@ -587,7 +587,7 @@ case "addTrackingData":
 		
 		// Check extension
 		$extension = substr($filename, strrpos($filename, ".") + 1);
-		if(strcmp($extension, "jpg") != 0 && strcmp($extension, "png") != 0)
+		if(strcasecmp($extension, "jpg") != 0 && strcasecmp($extension, "png") != 0)
 		{
 			$msg = "\nFile ".$filename." skipped: it is not a jpg or png file"."-".$extension;
 			echo "\n$msg\n";
@@ -651,7 +651,7 @@ case "deleteTrackingDatas":
 
 	// Check extension
 	$extension = substr($filename, strrpos($filename, ".") + 1);
-	if(strcmp($extension, "jpg") != 0 && strcmp($extension, "png") != 0)
+	if(strcasecmp($extension, "jpg") != 0 && strcasecmp($extension, "png") != 0)
 	{
 		$msg = "    File ".$filename." skipped: it is not a jpg or png file";
 		echo "\n$msg\n";
