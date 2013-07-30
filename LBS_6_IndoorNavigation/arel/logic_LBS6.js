@@ -13,7 +13,7 @@ arel.sceneReady(function() {
 
 function handleSceneEvents(type, trackingInformation)
 {
-	if(type && type == arel.Events.Scene.ONTRACKING && trackingInformation[0].getType() == arel.Tracking.LLA_MARKER)
+	if(type && type == arel.Events.Scene.ONTRACKING && trackingInformation[0].getType() == arel.Tracking.LLA_MARKER && trackingInformation[0].getCoordinateSystemID() == 2)
 	{
 		//override the GPS of the device with the location encoded in the marker
 		var lla = trackingInformation[0].getContent();
