@@ -29,7 +29,7 @@ function ArelFilter()
 			$('#searchlocal').keypress(function(e) { return that.keyControl(e); });		
 			$('#filter').change(function() { that.filterServer($('#filter').val()); return true; });
 			
-			$('.filterbuttonArea a.filterButton').click(function() {
+			$('.filterbuttonArea').click(function() {
 				$('.filterOptionsInner').slideToggle(900);				
 		    });			
 		}
