@@ -53,7 +53,7 @@ function addDatabase($email, $password, $dbName)
 		array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName
 		),
 		$errorMsg
@@ -73,7 +73,7 @@ function deleteDatabase($email, $password, $dbName)
 		array
 		(
             'email' => $email,
-            'password' => md5($email.$password), 
+            'password' => md5($password), 
             'dbName' => $dbName
 		),
 		$errorMsg
@@ -93,7 +93,7 @@ function addApplication($email, $password, $dbName, $appId)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
             'appIdentifier' => $appId
         ),
@@ -114,7 +114,7 @@ function addChannel($email, $password, $dbName, $channelID)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
             'appIdentifier' => 'com.metaio.junaio',
 			'channelId' => $channelID
@@ -129,7 +129,7 @@ function addChannel($email, $password, $dbName, $channelID)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
             'appIdentifier' => 'com.metaio.junaio-ipad',
 			'channelId' => $channelID
@@ -151,7 +151,7 @@ function deleteApplication($email, $password, $dbName, $appId)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
             'appIdentifier' => $appId
         ),
@@ -172,7 +172,7 @@ function deleteChannel($email, $password, $dbName, $channelID)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
             'appIdentifier' => 'com.metaio.junaio',
 			'channelId' => $channelID
@@ -187,7 +187,7 @@ function deleteChannel($email, $password, $dbName, $channelID)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
             'appIdentifier' => 'com.metaio.junaio-ipad',
 			'channelId' => $channelID
@@ -216,7 +216,7 @@ function addTrackingData($email, $password, $dbName, $image)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
 			'image' => $image
         ),
@@ -238,7 +238,7 @@ function deleteTrackingDatas($email, $password, $dbName, $tdNames)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
 			'tdNames' => $tdNames
         ),
@@ -259,7 +259,7 @@ function getTrackingDatas($email, $password, $dbName)
 		array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName
 		),
 		$errorMsg
@@ -279,7 +279,7 @@ function getStats($email, $password, $dbName)
 		array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName
 		),
 		$errorMsg
