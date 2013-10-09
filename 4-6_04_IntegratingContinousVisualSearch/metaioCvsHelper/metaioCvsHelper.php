@@ -14,11 +14,7 @@ require_once 'Zend/Http/Response.php';
  */
 function doPost($url, $config, $params, $localFile = NULL, $fileUploadFormName = NULL)
 {
-    // TODO Remove debug part of URL
-	$url = $url . '?XDEBUG_SESSION_START=mane';
-    // TODO Switch to productive
-	$client = new Zend_Http_Client("https://staging.metaio.com/REST/VisualSearch/".$url, $config); //https://testserver.junaio.com/REST/VisualSearch/
-    // https://my.metaio.com/REST/VisualSearch/
+	$client = new Zend_Http_Client("https://my.metaio.com/REST/VisualSearch/".$url, $config);
 	$client->setMethod(Zend_Http_Client::POST);
 	$client->setParameterPost($params);
 	if($localFile)
@@ -512,7 +508,7 @@ function isValidPath($localParentFolderPath, $fileName)
     }
 
     $msg = validateImageExtension($localParentFolderPath.$fileName);
-    if(isset($msg)) // TODO check if works with implicit NULL as false
+    if(isset($msg))
     {
         echo $msg;
         return false;
@@ -885,18 +881,17 @@ switch ($action)
         $metadata = getMetadata();
 
         $msg = validateImagePath($filePath);
-        if(isset($msg)) // TODO check if works with implicit NULL as false
+        if(isset($msg))
         {
             echo $msg;
             break;
         }
 
-        // TODO Whitespaces should be replaced in file name only! (and not in local folder name!)
         $fileName = basename($filePath);
         $parentFolder = dirname($filePath);
         $oldFileName = $fileName;
-        $msg = replaceWhitespaces($fileName, $parentFolder); // TODO double-check if passing of argument is OK (as it is by reference!)
-        if(isset($msg)) // TODO check if works with implicit NULL as false
+        $msg = replaceWhitespaces($fileName, $parentFolder);
+        if(isset($msg))
         {
             break;
         }
@@ -966,8 +961,8 @@ switch ($action)
                 continue;
             }
 
-            $msg = replaceWhitespaces($filename, $localFolderName); // TODO double-check if passing of argument is OK (as it is by reference!)
-            if(isset($msg)) // TODO check if works with implicit NULL as false
+            $msg = replaceWhitespaces($filename, $localFolderName);
+            if(isset($msg))
             {
                 continue;
             }
@@ -1008,13 +1003,13 @@ switch ($action)
         $filename = getImageFileName();
 
         $msg = validateImageExtension($filename);
-        if(isset($msg)) // TODO check if works with implicit NULL as false
+        if(isset($msg))
         {
             echo $msg;
             break;
         }
 
-        replaceWhitespaces($filename); // TODO double-check if passing of argument is OK (as it is by reference!)
+        replaceWhitespaces($filename);
 
         $response = removeItem($email, $password, $dbName, $filename);
 
@@ -1038,16 +1033,16 @@ switch ($action)
         $dbName = getDbName();
         $filename = getImageFileName();
 
-    //    $msg = validateImageExtension($filename);
-    //    if(isset($msg)) // TODO check if works with implicit NULL as false
-    //    {
-    //        echo $msg;
-    //        break;
-    //    }
+        $msg = validateImageExtension($filename);
+        if(isset($msg))
+        {
+            echo $msg;
+            break;
+        }
 
-        replaceWhitespaces($filename); // TODO double-check if passing of argument is OK (as it is by reference!)
+        replaceWhitespaces($filename);
 
-        $tdNames = array($filename); //."_0.td");
+        $tdNames = array($filename);
 
         $response = deleteTrackingDatas($email, $password, $dbName, $tdNames);
 
