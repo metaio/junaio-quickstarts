@@ -19,7 +19,7 @@ function doPost($url, $config, $params, $localFile = NULL, $fileUploadFormName =
 	$client->setParameterPost($params);
 	if($localFile)
 	{
-		// Upload images to database
+		// Upload item to database
 		$client->setFileUpload($localFile, $fileUploadFormName);
 	}
 
@@ -242,12 +242,12 @@ function deleteChannel($email, $password, $dbName, $channelID)
  * @param $email login email address at the license portal
  * @param $password password at the license portal
  * @param $dbName name of the new database
- * @param $image path to the image file
- * @param $identifier image identifier
- * @param $metadata image metadata
+ * @param $item path to the image (png, jpg), or zip file representing tracking configuration
+ * @param $identifier item identifier
+ * @param $metadata item metadata
  * @return Zend_Http_Response HTTP response
  */
-function addItem($email, $password, $dbName, $image, $identifier, $metadata)
+function addItem($email, $password, $dbName, $item, $identifier, $metadata)
 {
     $postResponse = doPost
 	(
@@ -261,7 +261,7 @@ function addItem($email, $password, $dbName, $image, $identifier, $metadata)
 			'identifier' => $identifier,
 			'metadata' => $metadata
         ),
-        $image,
+        $item,
 		"item"
     );
 	return $postResponse;
@@ -272,10 +272,10 @@ function addItem($email, $password, $dbName, $image, $identifier, $metadata)
  * @param $email login email address at the license portal
  * @param $password password at the license portal
  * @param $dbName name of the new database
- * @param $image path to the image file
+ * @param $trackable path to the image (png, jpg), or zip file representing tracking configuration
  * @return Zend_Http_Response HTTP response
  */
-function addTrackingData($email, $password, $dbName, $image)
+function addTrackingData($email, $password, $dbName, $trackable)
 {
     $postResponse = doPost
 	(
@@ -287,18 +287,18 @@ function addTrackingData($email, $password, $dbName, $image)
             'password' => md5($password),
             'dbName' => $dbName
         ),
-        $image,
+        $trackable,
 		"trackable"
     );
 	return $postResponse;
 }
 
 /**
- * Removes existing item/image from the database.
+ * Removes existing item from the database.
  * @param $email login email address at the license portal
  * @param $password password at the license portal
  * @param $dbName name of the new database
- * @param $itemName name of the image file
+ * @param $itemName name of the image (png, jpg) or of the file generated out of tracking configuration (ending with zip_<number>)
  * @return Zend_Http_Response HTTP response
  */
 function removeItem($email, $password, $dbName, $itemName)
@@ -319,11 +319,11 @@ function removeItem($email, $password, $dbName, $itemName)
 }
 
 /**
- * Deletes existing tracking datas / images from the database.
+ * Deletes existing trackables from the database.
  * @param $email login email address at the license portal
  * @param $password password at the license portal
  * @param $dbName name of the new database
- * @param $tdNames list of names of the image files
+ * @param $tdNames list of names of the image files or of the files generated out of tracking configuration (ending with zip_<number>)
  * @return Zend_Http_Response HTTP response
  */
 function deleteTrackingDatas($email, $password, $dbName, $tdNames)
@@ -344,7 +344,7 @@ function deleteTrackingDatas($email, $password, $dbName, $tdNames)
 }
 
 /**
- * Gets the names of the items/images contained in the database.
+ * Gets the names of the items contained in the database.
  * @param $email login email address at the license portal
  * @param $password password at the license portal
  * @param $dbName name of the new database
@@ -367,7 +367,7 @@ function getItems($email, $password, $dbName)
 }
 
 /**
- * Gets the names of the tracking datas / images contained in the database.
+ * Gets the names of the tracking datas contained in the database.
  * @param $email login email address at the license portal
  * @param $password password at the license portal
  * @param $dbName name of the new database
@@ -416,73 +416,83 @@ function getStats($email, $password, $dbName)
 
 function getAction()
 {
-    echo "\nPlease choose one of the commands: \n[addDatabase | deleteDatabase | getDatabases | addApplication | deleteApplication] \n[addItem | addTrackingData | removeItem | deleteTrackingData | getItems | getTrackingDatas | getStats ]\n";
+    echo PHP_EOL."Please choose one of the commands: ".PHP_EOL."[addDatabase | deleteDatabase | getDatabases | addApplication | deleteApplication] ".PHP_EOL."[addItem | addTrackingData | removeItem | deleteTrackingData | getItems | getTrackingDatas | getStats ]".PHP_EOL;
     $action = trim(fgets(STDIN));
     return $action;
 }
 
 function getEMail()
 {
-    echo "\nPlease enter your e-mail!\n";
+    echo PHP_EOL."Please enter your e-mail!".PHP_EOL;
     $email = trim(fgets(STDIN));
     return $email;
 }
 
 function getPassword()
 {
-    echo "\nPlease enter your password!\n";
+    echo PHP_EOL."Please enter your password!".PHP_EOL;
     $password = trim(fgets(STDIN));
     return $password;
 }
 
 function getDbName()
 {
-    echo "\nPlease enter the name of your database!\n";
+    echo PHP_EOL."Please enter the name of your database!".PHP_EOL;
     $dbName = trim(fgets(STDIN));
     return $dbName;
 }
 
 function getAppId()
 {
-    echo "\nPlease enter your Application or Channel ID!\n";
+    echo PHP_EOL."Please enter your Application or Channel ID!".PHP_EOL;
     $appId = trim(fgets(STDIN));
     return $appId;
 }
 
-function getImagePath()
+function getItemPath()
 {
-    echo "\nPlease enter the path of your image!\n";
+    echo PHP_EOL."Please enter the path of your image or tracking configuration!".PHP_EOL;
     $filename = trim(fgets(STDIN));
     return $filename;
 }
 
-function getImageFileName()
+function getItemFileName($entity = "item")
 {
-    echo "\nPlease enter the name of your image, including extension!\n";
+    echo PHP_EOL."Please enter the name of your $entity (if image, including extension; if $entity created based on zip file, including zip_<number> part)!".PHP_EOL;
     $filename = trim(fgets(STDIN));
     return $filename;
 }
 
-function validateImageExtension($filePath)
+function validateItemExtension($filePath, $removal = false)
 {
     // Check extension
     $extension = substr($filePath, strrpos($filePath, ".") + 1);
-    if(strcasecmp($extension, "jpg") != 0 && strcasecmp($extension, "png") != 0)
+    if(strcasecmp($extension, "jpg") !== 0 && strcasecmp($extension, "png") !== 0 && strcasecmp($extension, "zip") !== 0 && (!$removal || preg_match("/zip_[\d]{1,5}$/", $extension) !== 0))
     {
-        $msg = "\nFile ".$filePath." skipped: it is not a jpg or png file - $extension\n";
+        $msg = PHP_EOL."File ".$filePath." skipped: it is not a jpg, png nor ";
+        if ($removal)
+        {
+            $msg .= "in format zip_<number>";
+        }
+        else
+        {
+            $msg .= "zip file";
+        }
+        $msg .= " - $extension".PHP_EOL;
         return $msg;
     }
 }
 
-function validateImagePath($filePath)
+function validateItemPath($filePath)
 {
+    $msg = NULL;
     if(!is_file($filePath))
     {
-        $msg = "\nERROR: ".$filePath." is not a file (or you don't have permission to use it)\n ---- ADDING IMAGE FAILED ---- \n";
+        $msg = PHP_EOL."ERROR: ".$filePath." is not a file (or you don't have permission to use it)".PHP_EOL." ---- ADDING ITEM FAILED ---- ".PHP_EOL;
         return $msg;
     }
 
-    $msg = validateImageExtension($filePath);
+    $msg = validateItemExtension($filePath);
 
     return $msg;
 }
@@ -501,13 +511,13 @@ function isValidPath($localParentFolderPath, $fileName)
         }
         else
         {
-            $msg = "\nERROR: $localParentFolderPath.$fileName is not a file (or you don't have permission to use it)\n ---- ADDING IMAGE FAILED ---- \n";
-            echo "\n$msg\n";
+            $msg = PHP_EOL."ERROR: $localParentFolderPath.$fileName is not a file (or you don't have permission to use it)".PHP_EOL." ---- ADDING TRACKABLE FAILED ---- ".PHP_EOL;
+            echo PHP_EOL."$msg".PHP_EOL;
             return false;
         }
     }
 
-    $msg = validateImageExtension($localParentFolderPath.$fileName);
+    $msg = validateItemExtension($localParentFolderPath.$fileName);
     if(isset($msg))
     {
         echo $msg;
@@ -517,48 +527,28 @@ function isValidPath($localParentFolderPath, $fileName)
     return true;
 }
 
-function getOS()
-{
-    $os = strtoupper(substr(php_uname('s'), 0, 3));
-    return $os;
-}
-
-function getMoveCommand($parent, $oldFileName, $newFileName)
-{
-    $os = getOS();
-    if (strcmp($os, "WIN") === 0)
-    {
-        $moveCommand = "rename \"$parent\\$oldFileName\" \"$newFileName\"";
-    }
-    else // Linux/Unix, Mac, ...
-    {
-        $moveCommand = "mv '$parent/$oldFileName' '$parent/$newFileName'";
-    }
-    // redirecting stderr to stdout
-    $moveCommand .= " 2>&1";
-
-    return $moveCommand;
-}
-
-function replaceWhitespaces(&$fileName, $parent = NULL)
+function replaceWhitespaces(&$fileName, $parent = NULL, $entity = "item")
 {
     $found = strpos($fileName, " ");
     $position = $found;
     if ($found !== FALSE && $position > 0)
     {
-        echo "\nReplacing white spaces\n";
+        echo PHP_EOL."Replacing white spaces".PHP_EOL;
 
         $newFileName = str_replace(" ", "_", $fileName);
 
         if ($parent !== NULL)
         {
-            $cmd = getMoveCommand($parent, $fileName, $newFileName);
-
-            exec($cmd, $out, $failure);
-
-            if($failure)
+            if (file_exists($parent.DIRECTORY_SEPARATOR.$newFileName))
             {
-                $msg = "\nERROR - not possible to replace white spaces in image $fileName: $out[0]\n";
+                $msg = PHP_EOL."ERROR - not possible to replace white spaces in $entity $fileName: $newFileName already exists!".PHP_EOL;
+                echo $msg;
+                return $msg;
+            }
+
+            if (!rename($parent.DIRECTORY_SEPARATOR.$fileName, $parent.DIRECTORY_SEPARATOR.$newFileName))
+            {
+                $msg = PHP_EOL."ERROR - not possible to replace white spaces in $entity $fileName: reason unknown. Check if you have permission to create file (with new name).".PHP_EOL;
                 echo $msg;
                 return $msg;
             }
@@ -570,51 +560,51 @@ function replaceWhitespaces(&$fileName, $parent = NULL)
 
 function getIdentifier()
 {
-    echo "\nOptional: Please enter the identifier for your image!\n";
+    echo PHP_EOL."Optional: Please enter the identifier for your item!".PHP_EOL;
     $identifier = trim(fgets(STDIN));
     return $identifier;
 }
 
 function getMetadata()
 {
-    echo "\nOptional: Please enter the metadata for your image!\n";
+    echo PHP_EOL."Optional: Please enter the metadata for your item!".PHP_EOL;
     $metadata = trim(fgets(STDIN));
     return $metadata;
 }
 
-function getImageFolderPath()
+function getTrackablesFolderPath()
 {
-    echo "\nPlease enter the folder-path of your images!\n";
-    //images - important: folder name must end with "/", for example "images/" and not "images"
+    echo PHP_EOL."Please enter the folder-path of your trackables!".PHP_EOL;
+    //trackables - important: folder name must end with "/", for example "trackables/" and not "trackables"
     $localFolderName = trim(fgets(STDIN));
     return $localFolderName;
 }
 
-function validateImageFolderPath($localFolderName)
+function validateTrackablesFolderPath($localFolderName)
 {
     if(!is_dir($localFolderName))
     {
-        $msg = "\nERROR: ".$localFolderName." is not a folder\n ---- ADDING IMAGE(S) FAILED ---- \n";
+        $msg = PHP_EOL."ERROR: ".$localFolderName." is not a folder".PHP_EOL." ---- ADDING TRACKABLE(S) FAILED ---- ".PHP_EOL;
         return $msg;
     }
 }
 
-function updateImageFolderPath($localFolderName)
+function updateTrackablesFolderPath($localFolderName)
 {
     $lastCharName = strlen($localFolderName)-1;
     $result = substr($localFolderName, $lastCharName);
 
     if ($result == "/")
     {
-        echo "\nThe path of the local folder is: \n";
-        echo "\n $localFolderName \n";
+        echo PHP_EOL."The path of the local folder is: ".PHP_EOL;
+        echo PHP_EOL." $localFolderName ".PHP_EOL;
     }
     else
     {
         $result = $localFolderName."/";
         $localFolderName = $localFolderName."/";
-        echo "\nThe path of the local folder is: \n";
-        echo "\n $result \n";
+        echo PHP_EOL."The path of the local folder is: ".PHP_EOL;
+        echo PHP_EOL." $result ".PHP_EOL;
     }
 
     return $localFolderName;
@@ -718,7 +708,7 @@ function printDatabasesResult($response, $failMsg, $successMsg, $dumpXml = false
     }
 }
 
-function printImageArrayResult($response, $failMsg, $successMsg)
+function printImageArrayResult($response, $failMsg, $successMsg, $entity = "item")
 {
     $myXml = new SimpleXMLElement($response->getBody());
 
@@ -726,16 +716,16 @@ function printImageArrayResult($response, $failMsg, $successMsg)
     {
         if(strcmp($tag->getName(),"Error") === 0)
         {
-            $msg = "\n".$tag."\n\n$failMsg\n";
+            $msg = PHP_EOL.$tag.PHP_EOL.PHP_EOL."$failMsg".PHP_EOL;
         }
         else
         {
             $itemName = "";
             foreach($tag->children() as $item)
             {
-                $itemName .= $item['Name'] . "\n" . "  ";
+                $itemName .= $item['Name'] . PHP_EOL."" . "  ";
             }
-            $msg = "\n... got image: \n  $itemName\n\n $successMsg \n\n";
+            $msg = PHP_EOL."... got $entity: ".PHP_EOL."  $itemName".PHP_EOL.PHP_EOL." $successMsg ".PHP_EOL;
         }
 
         echo $msg;
@@ -750,7 +740,7 @@ switch ($action)
 {
     case "addDatabase":
 
-        echo "Creating CVS Database...\n";
+        echo "Creating CVS Database...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
@@ -760,7 +750,7 @@ switch ($action)
 
         if(isOK($response))
         {
-            printResult($response,"CREATING CVS DB FAILED"," Database $dbName has been created.\n ---- CREATING CVS DB SUCCESSFULLY COMPLETED ----");
+            printResult($response,"CREATING CVS DB FAILED"," Database $dbName has been created.".PHP_EOL." ---- CREATING CVS DB SUCCESSFULLY COMPLETED ----");
         }
         else
         {
@@ -771,7 +761,7 @@ switch ($action)
 
     case "deleteDatabase":
 
-            echo "Deleting CVS Database...\n";
+            echo "Deleting CVS Database...".PHP_EOL;
 
             $email = getEMail();
             $password = getPassword();
@@ -781,7 +771,7 @@ switch ($action)
 
             if(isOK($response))
             {
-                printResult($response,"DELETING CVS DB FAILED"," Database $dbName has been deleted.\n ---- DELETING CVS DB SUCCESSFULLY COMPLETED ----");
+                printResult($response,"DELETING CVS DB FAILED"," Database $dbName has been deleted.".PHP_EOL." ---- DELETING CVS DB SUCCESSFULLY COMPLETED ----");
             }
             else
             {
@@ -792,7 +782,7 @@ switch ($action)
 
     case "getDatabases":
 
-            echo "Getting CVS Databases...\n";
+            echo "Getting CVS Databases...".PHP_EOL;
 
             $email = getEMail();
             $password = getPassword();
@@ -812,7 +802,7 @@ switch ($action)
 
     case "addApplication":
 
-        echo "Connecting Application to CVS Database...\n";
+        echo "Connecting Application to CVS Database...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
@@ -830,7 +820,7 @@ switch ($action)
 
         if(isOK($response))
         {
-            printResult($response,"CONNECTING APPLICATION TO CVS DB FAILED"," Application $appId has been connected to the database $dbName.\n ---- CONNECTING APPLICATION TO CVS DB SUCCESSFULLY COMPLETED ----");
+            printResult($response,"CONNECTING APPLICATION TO CVS DB FAILED"," Application $appId has been connected to the database $dbName.".PHP_EOL." ---- CONNECTING APPLICATION TO CVS DB SUCCESSFULLY COMPLETED ----");
         }
         else
         {
@@ -841,8 +831,8 @@ switch ($action)
 
     case "deleteApplication":
 
-        $msg = "Deleting Application ...\n";
-        echo "\n$msg";
+        $msg = "Deleting Application ...".PHP_EOL;
+        echo PHP_EOL."$msg";
 
         $email = getEMail();
         $password = getPassword();
@@ -860,7 +850,7 @@ switch ($action)
 
         if(isOK($response))
         {
-            printResult($response,"DELETING APPLICATION FROM CVS FAILED"," Application $appId has been deleted from the database $dbName.\n ---- DELETING APPLICATION FROM CVS SUCCESSFULLY COMPLETED ----");
+            printResult($response,"DELETING APPLICATION FROM CVS FAILED"," Application $appId has been deleted from the database $dbName.".PHP_EOL." ---- DELETING APPLICATION FROM CVS SUCCESSFULLY COMPLETED ----");
         }
         else
         {
@@ -871,16 +861,16 @@ switch ($action)
 
     case "addItem":
 
-        echo "Adding image...\n";
+        echo "Adding item...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
         $dbName = getDbName();
-        $filePath = getImagePath();
+        $filePath = getItemPath();
         $identifier = getIdentifier();
         $metadata = getMetadata();
 
-        $msg = validateImagePath($filePath);
+        $msg = validateItemPath($filePath);
         if(isset($msg))
         {
             echo $msg;
@@ -900,12 +890,12 @@ switch ($action)
             $filePath = substr_replace($filePath, $fileName, strlen($filePath)-strlen($oldFileName));
         }
 
-        echo "\nUploading ".$filePath."...\n";
+        echo PHP_EOL."Uploading ".$filePath."...".PHP_EOL;
         $response = addItem($email, $password, $dbName, $filePath, $identifier, $metadata);
 
         if(isOK($response))
         {
-            printResult($response, "ADDING IMAGE $filePath FAILED", " \n ---- ADDING IMAGE $filePath SUCCESSFULLY COMPLETED ----");
+            printResult($response, "ADDING ITEM $filePath FAILED", " ".PHP_EOL." ---- ADDING ITEM $filePath SUCCESSFULLY COMPLETED ----");
         }
         else
         {
@@ -916,12 +906,12 @@ switch ($action)
 
     case "addTrackingData":
 
-        echo "Adding images...\n";
+        echo "Adding trackables...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
         $dbName = getDbName();
-        $localFolderName = getImageFolderPath();
+        $localFolderName = getTrackablesFolderPath();
 
     $ext = pathinfo($localFolderName, PATHINFO_EXTENSION);
 
@@ -929,11 +919,11 @@ switch ($action)
     {
         $response = addTrackingData($email, $password, $dbName, $localFolderName);
 
-        echo "\n\n... uploading ".$localFolderName."...\n\n";
+        echo PHP_EOL."... uploading ".$localFolderName."...".PHP_EOL;
 
         if(isOK($response))
         {
-            printResult($response, " ---- ADDING IMAGE FAILED ---- ", " ---- ADDING IMAGE SUCCESSFULLY COMPLETED ----");
+            printResult($response, " ---- ADDING TRACKABLES FAILED ---- ", " ---- ADDING TRACKABLES SUCCESSFULLY COMPLETED ----");
         }
         else
         {
@@ -942,7 +932,7 @@ switch ($action)
     }
         else {
 
-        $msg = validateImageFolderPath($localFolderName);
+        $msg = validateTrackablesFolderPath($localFolderName);
         if(isset($msg))
         {
             echo $msg;
@@ -951,9 +941,9 @@ switch ($action)
 
         $localFolder = opendir($localFolderName);
 
-        $localFolderName = updateImageFolderPath($localFolderName);
+        $localFolderName = updateTrackablesFolderPath($localFolderName);
 
-        $imageIndex = 0;
+        $trackableIndex = 0;
         while($filename = readdir($localFolder))
         {
             if (!isValidPath($localFolderName,$filename))
@@ -961,23 +951,23 @@ switch ($action)
                 continue;
             }
 
-            $msg = replaceWhitespaces($filename, $localFolderName);
+            $msg = replaceWhitespaces($filename, $localFolderName, "trackable");
             if(isset($msg))
             {
                 continue;
             }
 
-            $image = $localFolderName.$filename;
-            $response = addTrackingData($email, $password, $dbName, $image);
+            $trackable = $localFolderName.$filename;
+            $response = addTrackingData($email, $password, $dbName, $trackable);
 
-            echo "\n\n... uploading ".$filename."...\n\n";
+            echo PHP_EOL."... uploading ".$filename."...".PHP_EOL;
 
             if(isOK($response))
             {
-                printResult($response, " ---- ADDING IMAGE FAILED ---- ", " ---- ADDING IMAGE SUCCESSFULLY COMPLETED ----");
+                printResult($response, " ---- ADDING TRACKABLE FAILED ---- ", " ---- ADDING TRACKABLE SUCCESSFULLY COMPLETED ----");
                 if (!isError($response->getBody()))
                 {
-                    $imageIndex++;
+                    $trackableIndex++;
                 }
                 continue;
             }
@@ -987,7 +977,7 @@ switch ($action)
             }
         }
 
-        echo "\n\n... $imageIndex image(s) have been added.\n\n";
+        echo PHP_EOL."... $trackableIndex trackable(s) have been added.".PHP_EOL;
 
         }
 
@@ -995,14 +985,14 @@ switch ($action)
 
     case "removeItem":
 
-        echo "Removing image...\n";
+        echo "Removing item...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
         $dbName = getDbName();
-        $filename = getImageFileName();
+        $filename = getItemFileName();
 
-        $msg = validateImageExtension($filename);
+        $msg = validateItemExtension($filename, true);
         if(isset($msg))
         {
             echo $msg;
@@ -1015,7 +1005,7 @@ switch ($action)
 
         if(isOK($response))
         {
-            printResult($response, " ---- DELETING IMAGE FAILED ---- ", "\n    Image $filename has been deleted.\n\n ---- DELETING IMAGE SUCCESSFULLY COMPLETED ---- ");
+            printResult($response, " ---- DELETING ITEM FAILED ---- ", PHP_EOL."    Item $filename has been deleted.".PHP_EOL.PHP_EOL." ---- DELETING ITEM SUCCESSFULLY COMPLETED ---- ");
         }
         else
         {
@@ -1026,14 +1016,14 @@ switch ($action)
 
     case "deleteTrackingData":
 
-        echo "Deleting image...\n";
+        echo "Deleting trackable...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
         $dbName = getDbName();
-        $filename = getImageFileName();
+        $filename = getItemFileName("trackable");
 
-        $msg = validateImageExtension($filename);
+        $msg = validateItemExtension($filename, true);
         if(isset($msg))
         {
             echo $msg;
@@ -1048,7 +1038,7 @@ switch ($action)
 
         if(isOK($response))
         {
-            printResult($response, " ---- DELETING IMAGE $filename FAILED ---- ", "\n    Image $filename has been deleted.\n ---- DELETING IMAGE SUCCESSFULLY COMPLETED ---- ");
+            printResult($response, " ---- DELETING TRACKABLE $filename FAILED ---- ", PHP_EOL."    Trackable $filename has been deleted.".PHP_EOL." ---- DELETING TRACKABLE SUCCESSFULLY COMPLETED ---- ");
         }
         else
         {
@@ -1059,7 +1049,7 @@ switch ($action)
 
     case "getItems":
 
-        echo "Getting Items...\n";
+        echo "Getting Items...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
@@ -1080,7 +1070,7 @@ switch ($action)
 
     case "getTrackingDatas":
 
-        echo "Getting Tracking Data...\n";
+        echo "Getting trackables...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
@@ -1090,7 +1080,7 @@ switch ($action)
 
         if(isOK($response))
         {
-            printImageArrayResult($response, " ---- GETTING TRACKING DATA FAILED ---- ", " ---- GETTING TRACKING DATA SUCCESSFULLY COMPLETED ---- ");
+            printImageArrayResult($response, " ---- GETTING TRACKABLES FAILED ---- ", " ---- GETTING TRACKABLES SUCCESSFULLY COMPLETED ---- ", "trackable");
         }
         else
         {
@@ -1101,7 +1091,7 @@ switch ($action)
 
     case "getStats":
 
-        echo "Getting Stats...\n";
+        echo "Getting Stats...".PHP_EOL;
 
         $email = getEMail();
         $password = getPassword();
