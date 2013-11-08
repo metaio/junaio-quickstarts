@@ -430,7 +430,7 @@ function getEMail()
 
 function getPassword()
 {
-    echo PHP_EOL."Please enter your password!".PHP_EOL;
+    echo PHP_EOL."Please enter your ORIGINAL password! (metaioCvsHelper will md5 it for you)".PHP_EOL;
     $password = trim(fgets(STDIN));
     return $password;
 }
