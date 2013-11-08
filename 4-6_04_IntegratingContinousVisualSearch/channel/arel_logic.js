@@ -56,7 +56,10 @@ function sceneCallback(type,result)
 			// Make sure we don't have any objects in the scene
 			arel.Scene.removeObjects();
 
-			switch(result[0])	// Look into first result(array)
+			// Look into first result(array) and convert it to a string
+			var stringResult = result[0].toString();
+
+			switch(stringResult)
 			{
 				case "multi_pattern_1.jpg_0":
 					// Output on console
