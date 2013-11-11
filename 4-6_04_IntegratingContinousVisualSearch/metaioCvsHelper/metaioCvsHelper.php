@@ -249,18 +249,27 @@ function deleteChannel($email, $password, $dbName, $channelID)
  */
 function addItem($email, $password, $dbName, $item, $identifier, $metadata)
 {
+	$params = array (
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName
+					);
+					
+	// Add identifier and metadata as parameters only if they are not empty.
+	if (strlen(trim($identifier)) > 0)
+	{
+		$params['identifier'] = $identifier;
+	}
+	if (strlen(trim($metadata)) > 0)
+	{
+		$params['metadata'] = $metadata;
+	}
+	
     $postResponse = doPost
 	(
         "addItem.php",
         array('timeout' => 15),
-        array
-		(
-            'email' => $email,
-            'password' => md5($password),
-            'dbName' => $dbName,
-			'identifier' => $identifier,
-			'metadata' => $metadata
-        ),
+        $params,
         $item,
 		"item"
     );
