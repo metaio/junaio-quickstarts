@@ -1,36 +1,7 @@
 <?php
 
-/**
- * Class used to store status, body and error message of POST response.
- */
-class Response
-{
-	private $status;
-	private $body;
-	private $errorMessage;
-	
-	public function __construct($status, $body, $errorMessage)
-	{
-		$this->status = $status;
-		$this->body = $body;
-		$this->errorMessage = $errorMessage;
-	}
-
-	public function getStatus()
-	{
-		return $this->status;
-	}
-	
-	public function getBody()
-	{
-		return $this->body;
-	}
-	
-	public function getMessage()
-	{
-		return $this->errorMessage;
-	}
-}
+require_once 'Zend/Http/Client.php';
+require_once 'Zend/Http/Response.php';
 
 /**
  * Makes a POST-request to the Visual Search Database REST-API
@@ -43,48 +14,17 @@ class Response
  */
 function doPost($url, $config, $params, $localFile = NULL, $fileUploadFormName = NULL)
 {
-	$ch = curl_init();
-
-	// Set various cURL options.
-	curl_setopt($ch, CURLOPT_URL,"https://my.metaio.com/REST/VisualSearch/".$url);
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_HEADER, 1);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_FAILONERROR, true);
-	
-	// Set POST parameters.
+	$client = new Zend_Http_Client("https://my.metaio.com/REST/VisualSearch/".$url, $config);
+	$client->setMethod(Zend_Http_Client::POST);
+	$client->setParameterPost($params);
 	if($localFile)
 	{
 		// Upload item to database
-		$params[$fileUploadFormName] = "@$localFile";
+		$client->setFileUpload($localFile, $fileUploadFormName);
 	}
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-	
-	// Comment out following line for debugging purposes.
-	// curl_setopt($ch, CURLOPT_VERBOSE, true);
-	
-	// Execute request.
-	$fullResponse = curl_exec($ch);
-	
-	// Get HTTP code.
-	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-	
-	// Get error message (that curl is able to register), if any.
-	$errMsg = '';
-	if($fullResponse === false)
-	{
-		$errMsg = curl_error($ch);
-	}
-	
-	// Get body.
-	$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-    $body = substr($fullResponse, $header_size);
 
-	curl_close ($ch);
-	
-	$response = new Response($status, $body, $errMsg);
-	
+	$response = $client->request();
+
 	return $response;
 }
 
@@ -765,7 +705,6 @@ function printDatabasesResult($response, $failMsg, $successMsg, $dumpXml = false
                     }
                 }
             }
-			
 			$msg .= PHP_EOL.$successMsg;
         }
         $msg .= PHP_EOL.PHP_EOL;
