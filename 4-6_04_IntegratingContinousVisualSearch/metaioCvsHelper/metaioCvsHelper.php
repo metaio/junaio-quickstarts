@@ -659,7 +659,7 @@ function printResult($response, $failMsg, $successMsg, $printWholeBody = false)
             $msg = PHP_EOL.PHP_EOL;
             if(strcmp($tag->getName(),"Error") === 0)
             {
-                $msg .= $failMsg;
+                $msg .= $tag.PHP_EOL.PHP_EOL.$failMsg;
             }
             else
             {
