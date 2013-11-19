@@ -119,7 +119,7 @@ class ArelXMLHelper
 	 * @param Array $buttons An array defining buttons to be shown in the pop up / detail display 
 	 
 	 */
-	static public function createLocationBasedPOI($id, $title, $location, $thumbnail, $icon, $description = NULL, $buttons = NULL)
+	static public function createLocationBasedPOI($id, $title, $location, $thumbnail, $icon, $description, $buttons = array())
 	{
 		$obj = new ArelObjectPoi($id);
 		$obj->setTitle($title);
@@ -255,8 +255,9 @@ class ArelXMLHelper
 	 * @param string $resourcesPath Path to a zip holding all resources (models, images, shader, materials) [NOT SUPPORTED AT THE MOMENT)
 	 * @param string $arelPath Path to a an HTML defining the GUI and hosting the arel JS
 	 * @param string $trackingXML Path to the tracking xml or identifier of what shall be done (LLA Marker, Barcode / QR code). If nothing is provided, GPS is assumed.
+	 * @param Array $sceneOptions An array providing scene options
 	 */
-	static public function start($resourcesPath = NULL, $arelPath = NULL, $trackingXML = null)
+	static public function start($resourcesPath = NULL, $arelPath = NULL, $trackingXML = null, $sceneOptions = NULL)
 	{
 		$arelBackUpPath = "";
 		
@@ -279,6 +280,16 @@ class ArelXMLHelper
 		}
 		else
 			echo "<arel><![CDATA[$arelBackUpPath]]></arel>";
+			
+		if(isset($sceneOptions) && !empty($sceneOptions))
+		{
+			echo "<sceneoptions>";
+			foreach ($sceneOptions as $sceneOptionKey => $sceneOptionValue)
+			{
+				echo "<sceneoption key=\"$sceneOptionKey\"><![CDATA[$sceneOptionValue]]></sceneoption>";
+			}
+			echo "</sceneoptions>";
+		}
 	}
 	
 	/**
@@ -364,6 +375,10 @@ class ArelXMLHelper
 		   		
 		   	//transform
 		   	$transform = $assets3D->addChild("transform");
+			
+			$oTransform = $oObject->getTransformParent();
+			if (isset($oTransform))
+				$transform->addAttribute("parent", $oTransform);
 		   	
 		   	try {
 		   		
@@ -422,18 +437,22 @@ class ArelXMLHelper
 	   		//properties
 	   		$pickingEnabled = $oObject->isPickingEnabled();
 	   		$cosID = $oObject->getCoordinateSystemID();
+			$shaderMaterial = $oObject->getShaderMaterial();
 	   		$occluding = $oObject->isOccluding();
 	   		$transparency = $oObject->getTransparency();
 	   		$renderPosition = $oObject->getRenderOrderPosition();
             $screenAnchor = $oObject->getScreenAnchor();
 	   		   	
-		   	if(	isset($cosID) || isset($occluding) || isset($pickingEnabled) || 
+		   	if(	isset($cosID) || isset($shaderMaterial) || isset($occluding) || isset($pickingEnabled) || 
 		   		isset($screenAnchor) || isset($transparency) || isset($renderPosition))
 		   	{
 		   		$properties = $assets3D->addChild("properties");
 		   		
 		   		if(isset($cosID))
 		   			$properties->addChild("coordinatesystemid", $cosID);
+					
+				if(isset($shaderMaterial))
+		   			$properties->addChild("shadermaterial", $shaderMaterial);	
 		   			
 		   		if($occluding)
 		   			$properties->addChild("occluding", "true");
@@ -512,5 +531,25 @@ class ArelXMLHelper
 	    echo utf8_encode(trim(substr($out, $pos + 2)));
 	    ob_flush();		
 	}	
+	
+	/**
+	 * @brief Create array of currently supported scene options (with expected keys and based on provided locations), which is used as argument when starting output to junaio.
+	 * @param String $environmentMapLocation Relative path or URL to environment map.
+	 * @param Array $shaderMaterialsLocation Relative path or URL to shader materials.
+	 * @return Array array of currently supported scene options.	 
+	 */
+	public static function createSceneOptions($environmentMapLocation, $shaderMaterialsLocation = NULL)
+	{
+		$aSceneOptions = array();
+		if (!is_null($environmentMapLocation))
+		{
+			$aSceneOptions['environmentmap'] = $environmentMapLocation;
+		}
+		if (!is_null($shaderMaterialsLocation))
+		{
+			$aSceneOptions['shadermaterials'] = $shaderMaterialsLocation;
+		}
+		return $aSceneOptions;
+	}
 }
 ?>

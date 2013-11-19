@@ -15,6 +15,7 @@ require_once("arel_rotation.class.php");
 class ArelObjectModel3D extends ArelObject
 {
 	private $onscreen = NULL;
+	private $transformParent = NULL;
 	private $translation = array(0,0,0);
 	private $rotation = NULL;
 	private $scale = array(1,1,1);
@@ -23,6 +24,7 @@ class ArelObjectModel3D extends ArelObject
 	private $texture = NULL;
 	private $movie = NULL;
 	private $coordinateSystemID = NULL;
+	private $shaderMaterial = NULL;	
 	private $transparency = NULL;
 	private $renderorderposition = NULL;
 	private $picking = NULL;
@@ -38,8 +40,24 @@ class ArelObjectModel3D extends ArelObject
 		parent::__construct($id);
 		
 		$this->rotation = new ArelRotation();
+	}	
+			
+	/**
+	 * Get Objects currently defined parent
+	 * @return String the currently defined parent
+	 */
+	public function getTransformParent(){
+		return $this->transformParent;
 	}
 	
+	/**
+	 * Set Objects current object
+	 * @param String the parent object
+	 */
+	public function setTransformParent($transformParent){
+		$this->transformParent = $transformParent;
+	}
+
 	/**
 	 * Get Objects Translation
 	 * @return Array An array given all translation parameters x,y,z
@@ -179,7 +197,23 @@ class ArelObjectModel3D extends ArelObject
 	public function setCoordinateSystemID($coordinateSystemID){
 		$this->coordinateSystemID = $coordinateSystemID;
 	}
+	
+	/**
+	 * Get Objects currently defined shader material
+	 * @return String the currently defined shader material 
+	 */  
+	public function getShaderMaterial(){
+		return $this->shaderMaterial;
+	}
 
+	/**
+	 * Set Objects shader material. For this to work, you also have to define global shaderMaterials
+	 * @param String URL to the shader Materials file
+	 */ 
+	public function setShaderMaterial($shaderMaterial){
+		$this->shaderMaterial = $shaderMaterial;
+	}
+	
     /**
      * Sets the coordinates of the object relative to the screen anchor passed as the first argument
      * @param int $screenAnchor Constant defining the screen anchor where the object will be placed @see ArelAnchor

@@ -5,47 +5,38 @@ require_once 'Zend/Http/Response.php';
 
 /**
  * Makes a POST-request to the Visual Search Database REST-API
- * @param $url the name of the php-file which handles a specific REST-API request.
- * @param $config the config for Zend_Http_Client
- * @param $params post parameter (associative array which maps key to value)
- * @param $message the Visual Search Database result as XML DOM or the error
- * message as string if the request failed.
- * @param $files files which are uploaded to the server (only png, jpeg and xml are allowed)
+ * @param string $url the name of the php-file which handles a specific REST-API request.
+ * @param array $config the config for Zend_Http_Client
+ * @param array $params post parameter (associative array which maps key to value)
+ * @param string $localFile full local path to file to be uploaded
+ * @param string $fileUploadFormName form name that will be used when uploading a file
+ * @return Zend_Http_Response POST request response from visual CVS API
  */
-function doPost($url, $config, $params, &$message, $localFile = NULL)
+function doPost($url, $config, $params, $localFile = NULL, $fileUploadFormName = NULL)
 {
-	$client = new Zend_Http_Client("https://mobiledeveloperportal.ar-live.de/REST/VisualSearch/".$url, $config);
+	$client = new Zend_Http_Client("https://my.metaio.com/REST/VisualSearch/".$url, $config);
 	$client->setMethod(Zend_Http_Client::POST);
 	$client->setParameterPost($params);
 	if($localFile)
 	{
-		// Upload images to database
-		$client->setFileUpload($localFile, "trackable");
+		// Upload item to database
+		$client->setFileUpload($localFile, $fileUploadFormName);
 	}
 
 	$response = $client->request();
 
-	if(strcmp($response->getStatus(),"403") === 0)
-	{
-		echo "\nNo license present for your user!\n\n";
-		echo "Please verify if:\n";
-		echo "      - you have purchased a license.\n";                          
-		echo "      - your license has already expired.\n";
-		echo "      - you have used up your entire image quota.\n";
-		exit;
-	}
 	return $response;
 }
 
 /**
  * Creates a new database.
- * @param string $vstreeID name of the new database. If a database with this 
- * name does already exists, the request will fail.
- * @return an error message if the request failed otherwise an empty string 
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database. If a database with this name does already exists, the request will fail.
+ * @return Zend_Http_Response HTTP response
  */
 function addDatabase($email, $password, $dbName)
 {
-	$errorMsg = "";
 	$postResponse = doPost
 	(
 		"addDatabase.php", 
@@ -53,162 +44,248 @@ function addDatabase($email, $password, $dbName)
 		array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName
-		),
-		$errorMsg
+		)
 	);
-	$return = array($postResponse, $errorMsg);   
-	return $return;
-}
-
-// Deletes an existing database
-function deleteDatabase($email, $password, $dbName)
-{
-	$errorMsg = "";
-	$postResponse = doPost
-	(
-		"deleteDatabase.php", 
-		array('timeout' => 15),
-		array
-		(
-            'email' => $email,
-            'password' => md5($email.$password), 
-            'dbName' => $dbName
-		),
-		$errorMsg
-	);
-	$return = array($postResponse, $errorMsg);   
-	return $return;
-}
-
-// Adds an Application to the database
-function addApplication($email, $password, $dbName, $appId)
-{
-    $errorMsg = "";
-    $postResponse = doPost
-	(
-        "addApplication.php",
-        array('timeout' => 15),
-        array
-		(
-            'email' => $email,
-            'password' => md5($email.$password),
-            'dbName' => $dbName,
-            'appIdentifier' => $appId
-        ),
-        $errorMsg
-    );
-    $return = array($postResponse, $errorMsg);   
-	return $return;
-}
-
-// Adds a Channel to the database
-function addChannel($email, $password, $dbName, $channelID)
-{
-    $errorMsg = "";
-    $postResponse = doPost
-	(
-        "addApplication.php",
-        array('timeout' => 15),
-        array
-		(
-            'email' => $email,
-            'password' => md5($email.$password),
-            'dbName' => $dbName,
-            'appIdentifier' => 'com.metaio.junaio',
-			'channelId' => $channelID
-        ),
-        $errorMsg
-    );
-	
-	$postResponse = doPost
-	(
-        "addApplication.php",
-        array('timeout' => 15),
-        array
-		(
-            'email' => $email,
-            'password' => md5($email.$password),
-            'dbName' => $dbName,
-            'appIdentifier' => 'com.metaio.junaio-ipad',
-			'channelId' => $channelID
-        ),
-        $errorMsg
-    );
-    $return = array($postResponse, $errorMsg);   
-	return $return;
-}
-
-// Deletes an existing Application from the database
-function deleteApplication($email, $password, $dbName, $appId)
-{
-    $errorMsg = "";
-    $postResponse = doPost
-	(
-        "deleteApplication.php",
-        array('timeout' => 15),
-        array
-		(
-            'email' => $email,
-            'password' => md5($email.$password),
-            'dbName' => $dbName,
-            'appIdentifier' => $appId
-        ),
-        $errorMsg
-    );
-	$return = array($postResponse, $errorMsg);   
-	return $return;
-}
-
-// Deletes a Channel from the database
-function deleteChannel($email, $password, $dbName, $channelID)
-{
-    $errorMsg = "";
-    $postResponse = doPost
-	(
-        "deleteApplication.php",
-        array('timeout' => 15),
-        array
-		(
-            'email' => $email,
-            'password' => md5($email.$password),
-            'dbName' => $dbName,
-            'appIdentifier' => 'com.metaio.junaio',
-			'channelId' => $channelID
-        ),
-        $errorMsg
-    );
-
-	$postResponse = doPost
-	(
-        "deleteApplication.php",
-        array('timeout' => 15),
-        array
-		(
-            'email' => $email,
-            'password' => md5($email.$password),
-            'dbName' => $dbName,
-            'appIdentifier' => 'com.metaio.junaio-ipad',
-			'channelId' => $channelID
-        ),
-        $errorMsg
-    );
-    $return = array($postResponse, $errorMsg);   
-	return $return;
+	return $postResponse;
 }
 
 /**
- * Adds new TrackingDatas to the Database.
- * @param string $vstreeID name of the existing database. If a database with 
- * this name does not exist, the request will fail.
- * @param array $files a set of feature containers you want to upload. 
- * Feature containers are TrackingDatas or images (png or jpg).
- * @return an error message if the request failed otherwise an empty string 
+ * Deletes an existing database.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @return Zend_Http_Response HTTP response
  */
-function addTrackingData($email, $password, $dbName, $image)
+function deleteDatabase($email, $password, $dbName)
 {
-	$errorMsg = "";
+    $postResponse = doPost
+    (
+        "deleteDatabase.php",
+        array('timeout' => 15),
+        array
+        (
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName
+        )
+    );
+    return $postResponse;
+}
+
+/**
+ * Gets all databases of a user.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @return Zend_Http_Response HTTP response
+ */
+function getDatabases($email, $password)
+{
+    $postResponse = doPost
+    (
+        "getDatabases.php",
+        array('timeout' => 15),
+        array
+        (
+            'email' => $email,
+            'password' => md5($password)
+        )
+    );
+    return $postResponse;
+}
+
+/**
+ * Binds an application identifier to a database
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $appId application identifier
+ * @return Zend_Http_Response HTTP response
+ */
+function addApplication($email, $password, $dbName, $appId)
+{
+    $postResponse = doPost
+	(
+        "addApplication.php",
+        array('timeout' => 15),
+        array
+		(
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName,
+            'appIdentifier' => $appId
+        )
+    );
+	return $postResponse;
+}
+
+/**
+ * Binds a channel identifier to a database.
+ * Makes two requests: first with 'com.metaio.junaio', second with 'com.metaio.junaio-ipad' as appIdentifier.
+ * If first one has an error, second one is not made.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $channelID channel identifier
+ * @return Zend_Http_Response HTTP response
+ */
+function addChannel($email, $password, $dbName, $channelID)
+{
+    $postResponse = doPost
+	(
+        "addApplication.php",
+        array('timeout' => 15),
+        array
+		(
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName,
+            'appIdentifier' => 'com.metaio.junaio',
+			'channelId' => $channelID
+        )
+    );
+
+    if (isOK($postResponse) && !isError($postResponse->getBody()))
+    {
+        $postResponse = doPost
+        (
+            "addApplication.php",
+            array('timeout' => 15),
+            array
+            (
+                'email' => $email,
+                'password' => md5($password),
+                'dbName' => $dbName,
+                'appIdentifier' => 'com.metaio.junaio-ipad',
+                'channelId' => $channelID
+            )
+        );
+    }
+
+	return $postResponse;
+}
+
+/**
+ * Unbinds an application identifier from a database
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $appId application identifier
+ * @return Zend_Http_Response HTTP response
+ */
+function deleteApplication($email, $password, $dbName, $appId)
+{
+    $postResponse = doPost
+	(
+        "deleteApplication.php",
+        array('timeout' => 15),
+        array
+		(
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName,
+            'appIdentifier' => $appId
+        )
+    );
+	return $postResponse;
+}
+
+/**
+ * Unbinds a channel identifier from a database.
+ * Makes two requests: first with 'com.metaio.junaio', second with 'com.metaio.junaio-ipad' as appIdentifier.
+ * If first one has an error, second one is not made.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $channelID channel identifier
+ * @return Zend_Http_Response HTTP response
+ */
+function deleteChannel($email, $password, $dbName, $channelID)
+{
+    $postResponse = doPost
+	(
+        "deleteApplication.php",
+        array('timeout' => 15),
+        array
+		(
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName,
+            'appIdentifier' => 'com.metaio.junaio',
+			'channelId' => $channelID
+        )
+    );
+
+    if (isOK($postResponse) && !isError($postResponse->getBody()))
+    {
+        $postResponse = doPost
+        (
+            "deleteApplication.php",
+            array('timeout' => 15),
+            array
+            (
+                'email' => $email,
+                'password' => md5($password),
+                'dbName' => $dbName,
+                'appIdentifier' => 'com.metaio.junaio-ipad',
+                'channelId' => $channelID
+            )
+        );
+    }
+
+	return $postResponse;
+}
+
+/**
+ * Adds new item to the database.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $item path to the image (png, jpg), or zip file representing tracking configuration
+ * @param $identifier item identifier
+ * @param $metadata item metadata
+ * @return Zend_Http_Response HTTP response
+ */
+function addItem($email, $password, $dbName, $item, $identifier, $metadata)
+{
+	$params = array (
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName
+					);
+					
+	// Add identifier and metadata as parameters only if they are not empty.
+	if (strlen(trim($identifier)) > 0)
+	{
+		$params['identifier'] = $identifier;
+	}
+	if (strlen(trim($metadata)) > 0)
+	{
+		$params['metadata'] = $metadata;
+	}
+	
+    $postResponse = doPost
+	(
+        "addItem.php",
+        array('timeout' => 15),
+        $params,
+        $item,
+		"item"
+    );
+	return $postResponse;
+}
+
+/**
+ * Adds new tracking data to the database.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $trackable path to the image (png, jpg), or zip file representing tracking configuration
+ * @return Zend_Http_Response HTTP response
+ */
+function addTrackingData($email, $password, $dbName, $trackable)
+{
     $postResponse = doPost
 	(
         "addTrackingData.php",
@@ -216,21 +293,50 @@ function addTrackingData($email, $password, $dbName, $image)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
-            'dbName' => $dbName,
-			'image' => $image
+            'password' => md5($password),
+            'dbName' => $dbName
         ),
-        $errorMsg,
-        $image
+        $trackable,
+		"trackable"
     );
-	$return = array($postResponse, $errorMsg);   
-	return $return;
+	return $postResponse;
 }
 
-// Deletes existing TrackingDatas/Images from the database
+/**
+ * Removes existing item from the database.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $itemName name of the image (png, jpg) or of the file generated out of tracking configuration (ending with zip_<number>)
+ * @return Zend_Http_Response HTTP response
+ */
+function removeItem($email, $password, $dbName, $itemName)
+{
+    $postResponse = doPost
+	(
+        "removeItem.php",
+        array('timeout' => 15),
+        array
+		(
+            'email' => $email,
+            'password' => md5($password),
+            'dbName' => $dbName,
+			'itemName' => $itemName
+        )
+    );
+	return $postResponse;
+}
+
+/**
+ * Deletes existing trackables from the database.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @param $tdNames list of names of the image files or of the files generated out of tracking configuration (ending with zip_<number>)
+ * @return Zend_Http_Response HTTP response
+ */
 function deleteTrackingDatas($email, $password, $dbName, $tdNames)
 {
-	$errorMsg = "";
     $postResponse = doPost
 	(
         "deleteTrackingDatas.php",
@@ -238,20 +344,46 @@ function deleteTrackingDatas($email, $password, $dbName, $tdNames)
         array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName,
 			'tdNames' => $tdNames
-        ),
-        $errorMsg
+        )
     );
-    $return = array($postResponse, $errorMsg);   
-	return $return;
+	return $postResponse;
 }
 
-// Gets the names of the TrackingDatas/Images contained in the database
+/**
+ * Gets the names of the items contained in the database.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @return Zend_Http_Response HTTP response
+ */
+function getItems($email, $password, $dbName)
+{
+	$postResponse = doPost
+	(
+		"getItems.php", 
+		array('timeout' => 15),
+		array
+		(
+            'email' => $email,
+            'password' => md5($password), //md5($email.$password),
+            'dbName' => $dbName
+		)
+	);
+	return $postResponse;
+}
+
+/**
+ * Gets the names of the tracking datas contained in the database.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @return Zend_Http_Response HTTP response
+ */
 function getTrackingDatas($email, $password, $dbName)
 {
-	$errorMsg = "";
 	$postResponse = doPost
 	(
 		"getTrackingDatas.php", 
@@ -259,19 +391,22 @@ function getTrackingDatas($email, $password, $dbName)
 		array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName
-		),
-		$errorMsg
+		)
 	);
-	$return = array($postResponse, $errorMsg);   
-	return $return;
+	return $postResponse;
 }
 
-// Gets database statistics/information
+/**
+ * Gets database statistics/information.
+ * @param $email login email address at the license portal
+ * @param $password password at the license portal
+ * @param $dbName name of the new database
+ * @return Zend_Http_Response HTTP response
+ */
 function getStats($email, $password, $dbName)
 {
-	$errorMsg = "";
 	$postResponse = doPost
 	(
 		"getStats.php", 
@@ -279,509 +414,711 @@ function getStats($email, $password, $dbName)
 		array
 		(
             'email' => $email,
-            'password' => md5($email.$password),
+            'password' => md5($password),
             'dbName' => $dbName
-		),
-		$errorMsg
+		)
 	);
-	$return = array($postResponse, $errorMsg);   
-	return $return;
+	return $postResponse;
 }
 
+//-------------- HELPER FUNCTIONS --------------
 
-//-------------- EXECUTION START ------------------------
+function getAction()
+{
+    echo PHP_EOL."Please choose one of the commands: ".PHP_EOL."[addDatabase | deleteDatabase | getDatabases | addApplication | deleteApplication] ".PHP_EOL."[addItem | addTrackingData | removeItem | deleteTrackingData | getItems | getTrackingDatas | getStats ]".PHP_EOL;
+    $action = trim(fgets(STDIN));
+    return $action;
+}
 
-$msg = " ---- STARTING CREATE CVS DB ---- ";
-echo "\n$msg\n";
+function getEMail()
+{
+    echo PHP_EOL."Please enter your e-mail!".PHP_EOL;
+    $email = trim(fgets(STDIN));
+    return $email;
+}
 
-// Output with possible commands to choose from
- echo "\nPlease choose one of the commands: \n[addDatabase | deleteDatabase | addApplication | deleteApplication] \n[addTrackingData | deleteTrackingDatas | getTrackingDatas | getStats ]\n";
- 
-$action = trim(fgets(STDIN));
+function getPassword()
+{
+    echo PHP_EOL."Please enter your ORIGINAL password! (metaioCvsHelper will encode it for you)".PHP_EOL;
+    $password = trim(fgets(STDIN));
+    return $password;
+}
+
+function getDbName()
+{
+    echo PHP_EOL."Please enter the name of your database!".PHP_EOL;
+    $dbName = trim(fgets(STDIN));
+    return $dbName;
+}
+
+function getAppId()
+{
+    echo PHP_EOL."Please enter your Application or Channel ID!".PHP_EOL;
+    $appId = trim(fgets(STDIN));
+    return $appId;
+}
+
+function getItemPath()
+{
+    echo PHP_EOL."Please enter the path of your image or tracking configuration!".PHP_EOL;
+    $filename = trim(fgets(STDIN));
+    return $filename;
+}
+
+function getItemFileName($entity = "item")
+{
+    echo PHP_EOL."Please enter the name of your $entity (if image, including extension; if $entity created based on zip file, including zip_<number> part)!".PHP_EOL;
+    $filename = trim(fgets(STDIN));
+    return $filename;
+}
+
+function validateItemExtension($filePath, $removal = false)
+{
+    // Check extension
+    $extension = substr($filePath, strrpos($filePath, ".") + 1);
+    if(strcasecmp($extension, "jpg") !== 0 && strcasecmp($extension, "png") !== 0 && strcasecmp($extension, "zip") !== 0 && (!$removal || preg_match("/zip_[\d]{1,5}$/", $extension) !== 0))
+    {
+        $msg = PHP_EOL."File ".$filePath." skipped: it is not a jpg, png nor ";
+        if ($removal)
+        {
+            $msg .= "in format zip_<number>";
+        }
+        else
+        {
+            $msg .= "zip file";
+        }
+        $msg .= " - $extension".PHP_EOL;
+        return $msg;
+    }
+}
+
+function validateItemPath($filePath)
+{
+    $msg = NULL;
+    if(!is_file($filePath))
+    {
+        $msg = PHP_EOL."ERROR: ".$filePath." is not a file (or you don't have permission to use it)".PHP_EOL." ---- ADDING ITEM FAILED ---- ".PHP_EOL;
+        return $msg;
+    }
+
+    $msg = validateItemExtension($filePath);
+
+    return $msg;
+}
+
+function isValidPath($localParentFolderPath, $fileName)
+{
+    if(!is_file($localParentFolderPath.$fileName))
+    {
+        if(strcmp($fileName,".") === 0)
+        {
+            return false;
+        }
+        elseif(strcmp($fileName,"..") === 0)
+        {
+            return false;
+        }
+        else
+        {
+            $msg = PHP_EOL."ERROR: $localParentFolderPath.$fileName is not a file (or you don't have permission to use it)".PHP_EOL." ---- ADDING TRACKABLE FAILED ---- ".PHP_EOL;
+            echo PHP_EOL."$msg".PHP_EOL;
+            return false;
+        }
+    }
+
+    $msg = validateItemExtension($localParentFolderPath.$fileName);
+    if(isset($msg))
+    {
+        echo $msg;
+        return false;
+    }
+
+    return true;
+}
+
+function replaceWhitespaces(&$fileName, $parent = NULL, $entity = "item")
+{
+    $found = strpos($fileName, " ");
+    $position = $found;
+    if ($found !== FALSE && $position > 0)
+    {
+        echo PHP_EOL."Replacing white spaces".PHP_EOL;
+
+        $newFileName = str_replace(" ", "_", $fileName);
+
+        if ($parent !== NULL)
+        {
+            if (file_exists($parent.DIRECTORY_SEPARATOR.$newFileName))
+            {
+                $msg = PHP_EOL."ERROR - not possible to replace white spaces in $entity $fileName: $newFileName already exists!".PHP_EOL;
+                echo $msg;
+                return $msg;
+            }
+
+            if (!rename($parent.DIRECTORY_SEPARATOR.$fileName, $parent.DIRECTORY_SEPARATOR.$newFileName))
+            {
+                $msg = PHP_EOL."ERROR - not possible to replace white spaces in $entity $fileName: reason unknown. Check if you have permission to create file (with new name).".PHP_EOL;
+                echo $msg;
+                return $msg;
+            }
+        }
+
+        $fileName = $newFileName;
+    }
+}
+
+function getIdentifier()
+{
+    echo PHP_EOL."Optional: Please enter the identifier for your item!".PHP_EOL;
+    $identifier = trim(fgets(STDIN));
+    return $identifier;
+}
+
+function getMetadata()
+{
+    echo PHP_EOL."Optional: Please enter the metadata for your item!".PHP_EOL;
+    $metadata = trim(fgets(STDIN));
+    return $metadata;
+}
+
+function getTrackablesFolderPath()
+{
+    echo PHP_EOL."Please enter the folder-path of your trackables!".PHP_EOL;
+    //trackables - important: folder name must end with "/", for example "trackables/" and not "trackables"
+    $localFolderName = trim(fgets(STDIN));
+    return $localFolderName;
+}
+
+function validateTrackablesFolderPath($localFolderName)
+{
+    if(!is_dir($localFolderName))
+    {
+        $msg = PHP_EOL."ERROR: ".$localFolderName." is not a folder".PHP_EOL." ---- ADDING TRACKABLE(S) FAILED ---- ".PHP_EOL;
+        return $msg;
+    }
+}
+
+function updateTrackablesFolderPath($localFolderName)
+{
+    $lastCharName = strlen($localFolderName)-1;
+    $result = substr($localFolderName, $lastCharName);
+
+    if ($result == "/")
+    {
+        echo PHP_EOL."The path of the local folder is: ".PHP_EOL;
+        echo PHP_EOL." $localFolderName ".PHP_EOL;
+    }
+    else
+    {
+        $result = $localFolderName."/";
+        $localFolderName = $localFolderName."/";
+        echo PHP_EOL."The path of the local folder is: ".PHP_EOL;
+        echo PHP_EOL." $result ".PHP_EOL;
+    }
+
+    return $localFolderName;
+}
+
+function isOK($response)
+{
+    $error = strcmp($response->getStatus(),"200") === 0;
+    return $error;
+}
+
+function isError($body)
+{
+    $myXml = new SimpleXMLElement($body);
+
+    foreach($myXml as $tag)
+    {
+        if(strcmp($tag->getName(),"Error") === 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function printResult($response, $failMsg, $successMsg, $printWholeBody = false)
+{
+    $myXml = new SimpleXMLElement($response->getBody());
+
+    if ($printWholeBody)
+    {
+        $msg = PHP_EOL;
+        $msg .= $response->getBody();
+        $msg .= PHP_EOL;
+        $msg .= $successMsg;
+        $msg .= PHP_EOL;
+    }
+    else
+    {
+        foreach($myXml as $tag)
+        {
+            $msg = PHP_EOL.PHP_EOL;
+            if(strcmp($tag->getName(),"Error") === 0)
+            {
+                $msg .= $tag.PHP_EOL.PHP_EOL.$failMsg;
+            }
+            else
+            {
+                $msg .= $successMsg;
+            }
+            $msg .= PHP_EOL.PHP_EOL;
+        }
+    }
+    echo $msg;
+}
+
+function printDatabasesResult($response, $failMsg, $successMsg, $dumpXml = false)
+{
+    $myXml = new SimpleXMLElement($response->getBody());
+
+    foreach($myXml as $tag)
+    {
+        $msg = PHP_EOL.PHP_EOL;
+        if(strcmp($tag->getName(),"Error") === 0)
+        {
+            $msg .= $failMsg;
+        }
+        else
+        {
+            foreach ($tag->children() as $database)
+            {
+                $databaseName = (string)($database->attributes());
+                $msg .= "Database: $databaseName".PHP_EOL;
+                $applications = $database->children()->children();
+                if (sizeof($applications)>0)
+                {
+                    foreach($applications as $application)
+                    {
+                        $attributes = $application->attributes();
+                        $applicationName = (string)$attributes['Name'];
+                        $channelId = (int)$attributes['ChannelId'];
+                        $msg .= "   Application: $applicationName";
+                        if ($channelId !== -1)
+                        {
+                            $msg .= ",\tChannel ID: $channelId";
+                        }
+                        $msg .= PHP_EOL;
+                    }
+                }
+            }
+			$msg .= PHP_EOL.$successMsg;
+        }
+        $msg .= PHP_EOL.PHP_EOL;
+
+        echo $msg;
+    }
+
+    if ($dumpXml)
+    {
+        echo $response->getBody();
+    }
+}
+
+function printImageArrayResult($response, $failMsg, $successMsg, $entity = "item")
+{
+    $myXml = new SimpleXMLElement($response->getBody());
+
+    foreach($myXml as $tag)
+    {
+        if(strcmp($tag->getName(),"Error") === 0)
+        {
+            $msg = PHP_EOL.$tag.PHP_EOL.PHP_EOL."$failMsg".PHP_EOL;
+        }
+        else
+        {
+            $itemName = "";
+            foreach($tag->children() as $item)
+            {
+                $itemName .= $item['Name'] . PHP_EOL."" . "  ";
+            }
+            $msg = PHP_EOL."... got $entity: ".PHP_EOL."  $itemName".PHP_EOL.PHP_EOL." $successMsg ".PHP_EOL;
+        }
+
+        echo $msg;
+    }
+}
+
+//-------------- EXECUTION START --------------
+
+$action = getAction();
 
 switch ($action)
 {
-case "addDatabase":
+    case "addDatabase":
 
-// CREATE DATABASE
+        echo "Creating CVS Database...".PHP_EOL;
 
-	$msg = "Creating CVS Database...\n";
-	echo "\n$msg";
-	
-	// User input through: $... = trim(fgets(STDIN));
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
 
-	$addDbResponse = addDatabase($email, $password, $dbName);
-	$response = $addDbResponse[0];
-	// echo "\n".$response->getStatus();
-	// echo "\n".$response->getMessage();
-	// echo "\n".$response->getBody()."\n";
-	// var_dump($response);
-	
-	if(strcmp($response->getStatus(),"200") !== 0)
-	{
-		echo "\nCreating CVS database failed! ".$response->getStatus()." - ".$response->getMessage()."\n";
-		exit;
-	}
+        $response = addDatabase($email, $password, $dbName);
 
-	if(strlen($addDbResponse[1]) === 0)
-	{
-	   $myXml = new SimpleXMLElement($response->getBody());
-	   $myXml->getName();
-	   
-	   foreach($myXml as $tag)
-	   {
-			if(strcmp($tag->getName(),"Error") === 0)
-			{
-				echo "\n".$tag."\n";
-				$msg = " ---- CREATING CVS DB FAILED ---- ";
-				echo "\n$msg\n";
-			}
-			else
-			{
-				$msg = "... Database $dbName has been created.\n";
-				echo "\n$msg\n";
-				$msg = " ---- CREATING CVS DB SUCCESSFULLY COMPLETED ---- ";
-				echo "\n$msg\n";
-			}
-		exit;
-	   }
-	}
-break;
+        if(isOK($response))
+        {
+            printResult($response,"CREATING CVS DB FAILED"," Database $dbName has been created.".PHP_EOL." ---- CREATING CVS DB SUCCESSFULLY COMPLETED ----");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
 
-case "deleteDatabase":
+        break;
 
-// DELETING DATABASE
+    case "deleteDatabase":
 
-	$msg = "Deleting CVS Database...\n";
-	echo "\n$msg";
+            echo "Deleting CVS Database...".PHP_EOL;
 
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
+            $email = getEMail();
+            $password = getPassword();
+            $dbName = getDbName();
 
-	$addDbResponse = deleteDatabase($email, $password, $dbName);
-	$response = $addDbResponse[0];
-	// echo "\n".$response->getStatus();
-	// echo "\n".$response->getMessage();
-	// echo "\n".$response->getBody()."\n";
-	// var_dump($response);
+            $response = deleteDatabase($email, $password, $dbName);
 
-	if(strlen($addDbResponse[1]) === 0)
-	{
-	   $myXml = new SimpleXMLElement($response->getBody());
-	   $myXml->getName();
-	   
-	   foreach($myXml as $tag)
-	   {
-			if(strcmp($tag->getName(),"Error") === 0)
-			{
-				echo "\n".$tag."\n";
-				$msg = " ---- DELETING CVS DB FAILED ---- ";
-				echo "\n$msg\n";
-			}	
-			else
-			{
-				$msg = "... Database $dbName has been deleted.\n";
-				echo "\n$msg\n";
-				$msg = " ---- DELETING CVS DB SUCCESSFULLY COMPLETED ---- ";
-				echo "\n$msg\n";
-			}
-		exit;
-	   }
-	}
-break;
+            if(isOK($response))
+            {
+                printResult($response,"DELETING CVS DB FAILED"," Database $dbName has been deleted.".PHP_EOL." ---- DELETING CVS DB SUCCESSFULLY COMPLETED ----");
+            }
+            else
+            {
+                echo $response->getMessage();
+            }
 
-case "addApplication":
+            break;
 
-// ADD APPLICATION
+    case "getDatabases":
 
-// Connect app to db
+            echo "Getting CVS Databases...".PHP_EOL;
 
-	$msg = "Connecting Application to CVS Database...\n";
-	echo "\n$msg";
+            $email = getEMail();
+            $password = getPassword();
 
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
-	echo "\nPlease enter your Application or Channel ID!\n";
-	$appId = trim(fgets(STDIN));
+            $response = getDatabases($email, $password);
 
-	if (is_numeric($appId)) 
-	{
-		$addDbResponse = addChannel($email, $password, $dbName, $appId);
-		$response = $addDbResponse[0];
-	} 
-	else 
-	{
-		$addDbResponse = addApplication($email, $password, $dbName, $appId);
-		$response = $addDbResponse[0];
-		echo "\n".$response->getStatus();
-		// echo "\n".$response->getMessage();
-		// echo "\n".$response->getBody()."\n";
-		// var_dump($response);
-	}	
+            if(isOK($response))
+            {
+                printDatabasesResult($response,"GETTING CVS DBs FAILED"," ---- GETTING CVS DBs SUCCESSFULLY COMPLETED ----");
+            }
+            else
+            {
+                echo $response->getMessage();
+            }
 
-	if(strcmp($response->getStatus(),"200") !== 0)
-	{
-		echo "Adding the application to the CVS database failed! ".$response->getStatus()." - ".$response->getMessage()."\n";
-		exit;
-	}
-	
-	if(strlen($addDbResponse[1]) === 0)
-	{
-	   $myXml = new SimpleXMLElement($response->getBody());
-	   $myXml->getName();
-	   
-	   foreach($myXml as $tag)
-	   {		
-			if(strcmp($tag->getName(),"Error") === 0)
-			{
-				echo "\n".$tag."\n";
-				$msg = " ---- CONNECTING APLLICATION TO CVS DB FAILED ---- ";
-				echo "\n$msg\n";
-			}	
-			else
-			{
-				$msg = "... Application $appId has been connected to the database $dbName.\n";
-				echo "\n$msg\n";
-				$msg = " ---- CONNECTING APLLICATION TO CVS DB SUCCESSFULLY COMPLETED ---- ";
-				echo "\n$msg\n";
-			}
-		exit;
-	   }
-	}
-break;
+            break;
 
-case "deleteApplication":
+    case "addApplication":
 
-// DELETE APPLICATION
+        echo "Connecting Application to CVS Database...".PHP_EOL;
 
-	$msg = "Deleting Application ...\n";
-	echo "\n$msg";
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+        $appId = getAppId();
 
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
-	echo "\nPlease enter your Application or Channel ID!\n";
-	$appId = trim(fgets(STDIN));
+        if (is_numeric($appId))
+        {
+            $response = addChannel($email, $password, $dbName, $appId);
+        }
+        else
+        {
+            $response = addApplication($email, $password, $dbName, $appId);
+        }
 
-	if (is_numeric($appId)) 
-	{
-		$addDbResponse = deleteChannel($email, $password, $dbName, $appId);
-		$response = $addDbResponse[0];
-	} 
-	else 
-	{
-		$addDbResponse = deleteApplication($email, $password, $dbName, $appId);
-		$response = $addDbResponse[0];
-		// echo "\n".$response->getStatus();
-		// echo "\n".$response->getMessage();
-		// echo "\n".$response->getBody()."\n";
-		// var_dump($response);
-	}	
-	
-	if(strlen($addDbResponse[1]) === 0)
-	{
-	   $myXml = new SimpleXMLElement($response->getBody());
-	   $myXml->getName();
-	   
-	   foreach($myXml as $tag)
-	   {
-			if(strcmp($tag->getName(),"Error") === 0)
-			{
-				echo "\n".$tag."\n";
-				$msg = " ---- DELETING APLLICATION FROM CVS FAILED ---- ";
-				echo "\n$msg\n";
-			}	
-			else
-			{
-				$msg = "... Application $appId has been deleted from the database $dbName.\n";
-				echo "\n$msg\n";
-				$msg = " ---- DELETING APLLICATION FROM CVS SUCCESSFULLY COMPLETED ---- ";
-				echo "\n$msg\n";
-			}
-		exit;
-	   }
-	}
-break;
+        if(isOK($response))
+        {
+            printResult($response,"CONNECTING APPLICATION TO CVS DB FAILED"," Application $appId has been connected to the database $dbName.".PHP_EOL." ---- CONNECTING APPLICATION TO CVS DB SUCCESSFULLY COMPLETED ----");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
 
-case "addTrackingData":
+        break;
 
-// ADD TRACKING DATA/IMAGES
+    case "deleteApplication":
 
-	// Add images that are in $localFolder to the CVS database
-	$msg = "Adding images...\n";
-	echo "\n$msg";
+        $msg = "Deleting Application ...".PHP_EOL;
+        echo PHP_EOL."$msg";
 
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
-	echo "\nPlease enter the folder-path of your images!\n";
-	//images - important: folder name must end with "/", for example "images/" and not "images"
-	$localFolderName = trim(fgets(STDIN));
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+        $appId = getAppId();
 
-	if(!is_dir($localFolderName))
-	{
-		$msg = "ERROR: ".$localFolderName." is not a folder";
-		echo "\n$msg\n";
-		$msg = " ---- ADDING IMAGE(S) FAILED ---- ";
-		echo "\n$msg\n";
-		exit;
-	}
-	$localFolder = opendir($localFolderName);
+        if (is_numeric($appId))
+        {
+            $response = deleteChannel($email, $password, $dbName, $appId);
+        }
+        else
+        {
+            $response = deleteApplication($email, $password, $dbName, $appId);
+        }
 
-	$lastCharName = strlen($localFolderName)-1; 
-	$result = substr($localFolderName, $lastCharName); 
-	
-	if ($result == "/") 
-	{
-		echo "\nThe path of the local folder is: \n";
-		echo "\n $localFolderName \n"; 
-	}
-	else 
-	{ 
-		$result = $localFolderName."/"; 
-		$localFolderName = $localFolderName."/"; 
-		echo "\nThe path of the local folder is: \n";
-		echo "\n $result \n"; 
-	}
-	$imageIndex = 0;
-	while($filename = readdir($localFolder))
-	{
-		if(!is_file($localFolderName.$filename))
-		{
-			if(strcmp($filename,".") === 0)
-			{
-				continue;
-			}
-			elseif(strcmp($filename,"..") === 0) 
-			{
-				continue;
-			}
-			else
-			{
-				echo "\n $localFolderName$filename is not a file!";
-				$msg = " File ".$filename." skipped: it is not a jpg or png file";
-				echo "\n$msg\n";
-				continue;
-			}
-		}
-		
-		// Check extension
-		$extension = substr($filename, strrpos($filename, ".") + 1);
-		if(strcasecmp($extension, "jpg") != 0 && strcasecmp($extension, "png") != 0)
-		{
-			$msg = "\nFile ".$filename." skipped: it is not a jpg or png file"."-".$extension;
-			echo "\n$msg\n";
-			continue;
-		}
+        if(isOK($response))
+        {
+            printResult($response,"DELETING APPLICATION FROM CVS FAILED"," Application $appId has been deleted from the database $dbName.".PHP_EOL." ---- DELETING APPLICATION FROM CVS SUCCESSFULLY COMPLETED ----");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
 
-		// Replace white spaces
-		if(strpos($filename, " ") > 0)
-		{
-			$msg = "        Replacing white spaces ";
-			echo "\n$msg\n";
-			$newFilename = str_replace(" ", "_", $filename);
-			$cmd = "mv '".$localFolderName.$filename."' '".$localFolderName.$newFilename."' 2>&1";
-			exec($cmd, $out, $failure);
-			if($failure)
-			{
-				$msg = "        ERROR: impossible to replace white spaces in image ".$filename;
-				echo "\n$msg\n";
-				continue;
-			}
-			$filename = $newFilename;
-		}
-		$image = $localFolderName.$filename;
-		$addImageResponse = addTrackingData($email, $password, $dbName, $image);
-		$msg = "\n... uploading ".$filename."...\n";
-		echo "\n$msg\n";
-		$response = $addImageResponse[0];
+        break;
 
-		if(strcmp($response->getStatus(),"200") === 0)
-		{
-			echo "Image-Upload was successful!\n";
-			$imageIndex++;	
-			continue;	
-		}		
-		else
-		{
-			echo "\n".$tag."\n";
-			$msg = " ---- ADDING IMAGE(S) FAILED ---- ";
-			echo "\n$msg\n";
-		}
-	}
-	$msg = "\n... $imageIndex image(s) have been added.\n";
-	echo "\n$msg\n";
-break;
+    case "addItem":
 
-case "deleteTrackingDatas":
+        echo "Adding item...".PHP_EOL;
 
-// DELETE TRACKING DATA/IMAGES
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+        $filePath = getItemPath();
+        $identifier = getIdentifier();
+        $metadata = getMetadata();
 
-	$msg = "Deleting images...\n";
-	echo "\n$msg";
+        $msg = validateItemPath($filePath);
+        if(isset($msg))
+        {
+            echo $msg;
+            break;
+        }
 
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
-	echo "\nPlease enter the name and the extension of the image you want to delete!\n";
-	$filename = trim(fgets(STDIN));
+        $fileName = basename($filePath);
+        $parentFolder = dirname($filePath);
+        $oldFileName = $fileName;
+        $msg = replaceWhitespaces($fileName, $parentFolder);
+        if(isset($msg))
+        {
+            break;
+        }
+        else
+        {
+            $filePath = substr_replace($filePath, $fileName, strlen($filePath)-strlen($oldFileName));
+        }
 
-	// Check extension
-	$extension = substr($filename, strrpos($filename, ".") + 1);
-	if(strcasecmp($extension, "jpg") != 0 && strcasecmp($extension, "png") != 0)
-	{
-		$msg = "    File ".$filename." skipped: it is not a jpg or png file";
-		echo "\n$msg\n";
-		continue;
-	}
+        echo PHP_EOL."Uploading ".$filePath."...".PHP_EOL;
+        $response = addItem($email, $password, $dbName, $filePath, $identifier, $metadata);
 
-	if(strpos($filename, " ") > 0)
-	{
-		echo "Images are not aloud to contain white spaces!";
-	}
-	$tdNames = array($filename."_0.td");
+        if(isOK($response))
+        {
+            printResult($response, "ADDING ITEM $filePath FAILED", " ".PHP_EOL." ---- ADDING ITEM $filePath SUCCESSFULLY COMPLETED ----");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
 
-	$addImageResponse = deleteTrackingDatas($email, $password, $dbName, $tdNames);
-	$response = $addImageResponse[0];
-	// echo "\n".$response->getStatus();
-	// echo "\n".$response->getMessage();
-	// echo "\n".$response->getBody()."\n";
-	// var_dump($response);
+        break;
 
-	if(strcmp($response->getStatus(),"200") === 0)
-	{
-		$msg = "... deleting ".$filename;
-		echo "\n$msg\n";
-	}		
-	else
-	{
-		echo "\n".$tag."\n";		
-		$msg = " ---- DELETING IMAGE FAILED ---- ";
-		echo "\n$msg\n";
-	}
-	$msg = "\n    Image $filename has been deleted.\n";
-	echo "\n$msg\n";
-	$msg = " ---- DELETING IMAGE SUCCESSFULLY COMPLETED ---- ";
-	echo "\n$msg\n";
-break;
+    case "addTrackingData":
 
-case "getTrackingDatas":
+        echo "Adding trackables...".PHP_EOL;
 
-// GET TRACKING DATAS
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+        $localFolderName = getTrackablesFolderPath();
 
-	$msg = "Getting Tracking Data...\n";
-	echo "\n$msg";
+    $ext = pathinfo($localFolderName, PATHINFO_EXTENSION);
 
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
-	
-	$addDbResponse = getTrackingDatas($email, $password, $dbName);
-	$response = $addDbResponse[0];
-	// echo "\n".$response->getStatus();
-	// echo "\n".$response->getMessage();
-	// echo "\n".$response->getBody()."\n";
-	// var_dump($response);
+    if( strtolower($ext) == "zip" )
+    {
+        $response = addTrackingData($email, $password, $dbName, $localFolderName);
 
-	if(strlen($addDbResponse[1]) === 0)
-	{
-	   $myXml = new SimpleXMLElement($response->getBody());
-	   $myXml->getName();
-	   
-	   foreach($myXml as $tag)
-	   {
-			if(strcmp($tag->getName(),"Error") === 0)
-			{
-				echo "\n".$tag."\n";
-				$msg = " ---- GETTING TRACKING DATA FAILED ---- ";
-				echo "\n$msg\n";
-			}	
-			else
-			{
-				$trackingDataName = "";
-				foreach($tag->children() as $trackingData)
-				{
-					$trackingDataName .= $trackingData['Name'] . "\n" . "  ";
-				}
-				$msg = "... got Tracking Data: \n  $trackingDataName"; 
-				echo "\n$msg\n";
-				$msg = " ---- GETTING TRACKING DATA SUCCESSFULLY COMPLETED ---- ";
-				echo "\n$msg\n";
-			}
-	   }
-	}
-break;
+        echo PHP_EOL."... uploading ".$localFolderName."...".PHP_EOL;
 
-case "getStats":
+        if(isOK($response))
+        {
+            printResult($response, " ---- ADDING TRACKABLES FAILED ---- ", " ---- ADDING TRACKABLES SUCCESSFULLY COMPLETED ----");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
+    }
+        else {
 
-// GET STATS
+        $msg = validateTrackablesFolderPath($localFolderName);
+        if(isset($msg))
+        {
+            echo $msg;
+            break;
+        }
 
-	$msg = "Getting Stats...\n";
-	echo "\n$msg";
+        $localFolder = opendir($localFolderName);
 
-	echo "\nPlease enter your e-mail!\n";
-	$email = trim(fgets(STDIN));
-	echo "\nPlease enter your password!\n";
-	$password = trim(fgets(STDIN));
-	echo "\nPlease enter the name of your database!\n";
-	$dbName = trim(fgets(STDIN));
+        $localFolderName = updateTrackablesFolderPath($localFolderName);
 
-	$addDbResponse = getStats($email, $password, $dbName);
-	$response = $addDbResponse[0];
-	// echo "\n".$response->getStatus();
-	// echo "\n".$response->getMessage();
-	// echo "\n".$response->getBody()."\n";
-	// var_dump($response);
+        $trackableIndex = 0;
+        while($filename = readdir($localFolder))
+        {
+            if (!isValidPath($localFolderName,$filename))
+            {
+                continue;
+            }
 
-	if(strlen($addDbResponse[1]) === 0)
-	{
-	   $myXml = new SimpleXMLElement($response->getBody());
-	  
+            $msg = replaceWhitespaces($filename, $localFolderName, "trackable");
+            if(isset($msg))
+            {
+                continue;
+            }
 
-		// find out if the request was sucessful:
-	   foreach($myXml as $tag)
-	   {
-			if(strcmp($tag->getName(),"Error") === 0)
-			{	
-				echo "\n".$tag."\n";
-				$msg = " ---- GETTING STATS FAILED ---- ";
-				echo "\n$msg\n";
-				break;
-			}
-		}
-		echo "\n... got Stats: \n ";
-		echo "\n";
-		var_dump($myXml);
-		$msg = " ---- GETTING STATS SUCCESSFULLY COMPLETED ---- ";
-		echo "\n$msg\n";
-	}
-	break;
+            $trackable = $localFolderName.$filename;
+            $response = addTrackingData($email, $password, $dbName, $trackable);
+
+            echo PHP_EOL."... uploading ".$filename."...".PHP_EOL;
+
+            if(isOK($response))
+            {
+                printResult($response, " ---- ADDING TRACKABLE FAILED ---- ", " ---- ADDING TRACKABLE SUCCESSFULLY COMPLETED ----");
+                if (!isError($response->getBody()))
+                {
+                    $trackableIndex++;
+                }
+                continue;
+            }
+            else
+            {
+                echo $response->getMessage();
+            }
+        }
+
+        echo PHP_EOL."... $trackableIndex trackable(s) have been added.".PHP_EOL;
+
+        }
+
+        break;
+
+    case "removeItem":
+
+        echo "Removing item...".PHP_EOL;
+
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+        $filename = getItemFileName();
+
+        $msg = validateItemExtension($filename, true);
+        if(isset($msg))
+        {
+            echo $msg;
+            break;
+        }
+
+        replaceWhitespaces($filename);
+
+        $response = removeItem($email, $password, $dbName, $filename);
+
+        if(isOK($response))
+        {
+            printResult($response, " ---- DELETING ITEM FAILED ---- ", PHP_EOL."    Item $filename has been deleted.".PHP_EOL.PHP_EOL." ---- DELETING ITEM SUCCESSFULLY COMPLETED ---- ");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
+
+        break;
+
+    case "deleteTrackingData":
+
+        echo "Deleting trackable...".PHP_EOL;
+
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+        $filename = getItemFileName("trackable");
+
+        $msg = validateItemExtension($filename, true);
+        if(isset($msg))
+        {
+            echo $msg;
+            break;
+        }
+
+        replaceWhitespaces($filename);
+
+        $tdNames = array($filename);
+
+        $response = deleteTrackingDatas($email, $password, $dbName, $tdNames);
+
+        if(isOK($response))
+        {
+            printResult($response, " ---- DELETING TRACKABLE $filename FAILED ---- ", PHP_EOL."    Trackable $filename has been deleted.".PHP_EOL." ---- DELETING TRACKABLE SUCCESSFULLY COMPLETED ---- ");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
+
+        break;
+
+    case "getItems":
+
+        echo "Getting Items...".PHP_EOL;
+
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+
+        $response = getItems($email, $password, $dbName);
+
+        if(isOK($response))
+        {
+            printImageArrayResult($response, " ---- GETTING ITEM FAILED ---- ", " ---- GETTING ITEM SUCCESSFULLY COMPLETED ---- ");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
+
+        break;
+
+    case "getTrackingDatas":
+
+        echo "Getting trackables...".PHP_EOL;
+
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+
+        $response = getTrackingDatas($email, $password, $dbName);
+
+        if(isOK($response))
+        {
+            printImageArrayResult($response, " ---- GETTING TRACKABLES FAILED ---- ", " ---- GETTING TRACKABLES SUCCESSFULLY COMPLETED ---- ", "trackable");
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
+
+        break;
+
+    case "getStats":
+
+        echo "Getting Stats...".PHP_EOL;
+
+        $email = getEMail();
+        $password = getPassword();
+        $dbName = getDbName();
+
+        $response = getStats($email, $password, $dbName);
+
+        if(isOK($response))
+        {
+            printResult($response, " ---- GETTING STATS FAILED ---- ", " ---- GETTING STATS SUCCESSFULLY COMPLETED ---- ", true);
+        }
+        else
+        {
+            echo $response->getMessage();
+        }
+
+        break;
 }
 
 ?>
