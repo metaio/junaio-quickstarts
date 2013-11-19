@@ -1,8 +1,5 @@
 arel.sceneReady(function()
 {	
-	//Just for Debuging purposes
-	//arel.Debug.activate();
-	//arel.Debug.deactivateArelLogStream();
 	
 	//set a listener to tracking to get information about when the image is tracked
 	arel.Events.setListener(arel.Scene, function(type, param){trackingHandler(type, param);});
@@ -13,6 +10,7 @@ arel.sceneReady(function()
 	
 	//initialises the Arel-Social-Plugin
 	var social = new arel.Plugin.Social();
+	
 	
 	var tweetMessage = "This is a custom Tweet Message!";
 	var urlToShare = "http://www.junaio.com";
@@ -127,12 +125,12 @@ function trackingHandler(type, param)
 		//if the pattern is found, hide the information to hold your phone over the pattern
 		if(type && type == arel.Events.Scene.ONTRACKING && param[0].getState() == arel.Tracking.STATE_TRACKING)
 		{
-			$('#info').hide();
+			$('#info').fadeOut("fast");
 		}
 		//if the pattern is lost tracking, show the information to hold your phone over the pattern
 		else if(type && type == arel.Events.Scene.ONTRACKING && param[0].getState() == arel.Tracking.STATE_NOTTRACKING)
 		{
-			$('#info').show();
+			$('#info').fadeIn("fast");
 		}
 	}
 };
@@ -141,6 +139,6 @@ function trackingHandler(type, param)
 function receiveTrackingStatus(trackingValues)
 {
 	if(trackingValues[0] === undefined)
-		$('#info').show();
+		$('#info').fadeIn("fast");
 	
 };

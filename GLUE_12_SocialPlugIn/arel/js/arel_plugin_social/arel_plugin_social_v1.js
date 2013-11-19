@@ -19,8 +19,16 @@ arel.Plugin.Social = function ()
 	this.init = function()
 	{	
 		//build up the right absolut path to the resources
-		this.resourcePath = "arel/arel_plugin_social/resources/";
-					
+		if( window.location.href.lastIndexOf("/") == window.location.href.length - 1 )
+		{
+			this.resourcePath = window.location.href + "js/arel_plugin_social/resources/";
+		}
+		else
+		{
+			this.resourcePath = window.location.href.substring( 0, window.location.href.lastIndexOf("/") + 1 ) + "js/arel_plugin_social/resources/";
+		}
+		
+		
 		this.cssButtonContainer = 		"position: absolute;" +
 										"bottom: 5px;" +
 										"right: 5px;" +

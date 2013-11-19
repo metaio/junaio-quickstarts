@@ -1,11 +1,11 @@
 <html>
     <head>
     	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" >
-    	<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.min.js"></script>					<!--   jQuery  -->
+    	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"> 
     	<script type="text/javascript" src="http://dev.junaio.com/arel/js/arel.js"></script>
-    	<script type="text/javascript" src="arel_plugin_social/arel_plugin_social_v1.js"></script>
-    	<script type="text/javascript" src="logic.js"></script>
+    	<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+    	<script type="text/javascript" src="js/arel_plugin_social/arel_plugin_social_v1.js"></script>
+    	<script type="text/javascript" src="js/logic.js"></script>
     	    	
     	<style type="text/css">
 		* {
@@ -60,7 +60,7 @@
     </head>
 	<body>
 		<div id="center">
-			<div id="info">Please hold your device over the metaio pattern.<br /><br /><img src="metaioMan.png" /></div>
+			<div id="info">Please hold your device over the metaio pattern.<br /><br /><img src="images/metaioMan.png" /></div>
 		</div>				
 	</body>            
 </html>
