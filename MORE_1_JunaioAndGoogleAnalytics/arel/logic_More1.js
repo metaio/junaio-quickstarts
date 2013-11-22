@@ -16,7 +16,7 @@ arel.sceneReady(function()
 	jAnalytics = new arel.Plugin.Analytics (analyticsUser, arel.Plugin.Analytics.EventSampling.ALTERNATE);
 	
 	//log the channel opening
-	jAnalytics.logSceneReady(arel.Scene.getID());
+	//jAnalytics.logSceneReady(arel.Scene.getID());
 	
 });
 
