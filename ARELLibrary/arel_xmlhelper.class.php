@@ -327,8 +327,11 @@ class ArelXMLHelper
 	    	
 		   	try {
 		   		$location->addChild('lat', $oLocation[0]);
-	    		$location->addChild('lon', $oLocation[1]);
-	    		$location->addChild('alt', $oLocation[2]);
+	    			$location->addChild('lon', $oLocation[1]);
+	    			if(isset($oLocation[2]))
+	    		    		$location->addChild('alt', $oLocation[2]);
+                		else
+                    	    		$location->addChild('alt', 0);
 		   	}
 		   	catch(Exception $e)
 		   	{
