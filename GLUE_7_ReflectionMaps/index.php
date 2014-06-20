@@ -24,7 +24,9 @@ require_once '../ARELLibrary/arel_xmlhelper.class.php';
  */
 
 //start output
-ArelXMLHelper::start(NULL, "index.html", "http://www.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip", array("resources/space.png"));
+$list = array();
+$list["EnvironmentMap"] = "resources/space.jpeg";
+ArelXMLHelper::start(NULL, "index.html", "resources/tracking_tutorial.zip", $list);
 
 //output the truck with reflection maps included
 $oObject = ArelXMLHelper::createGLUEModel3D(
