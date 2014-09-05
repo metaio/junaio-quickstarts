@@ -33,7 +33,7 @@ require_once '../ARELLibrary/arel_xmlhelper.class.php';
 //use the Arel Helper to start the output with arel
 
 //start output
-ArelXMLHelper::start(NULL, "arel/index.html", "http://www.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip");
+ArelXMLHelper::start(NULL, "arel/index.html", "http://dev.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip");
 
 //metaio man 3D Model
 //Important: note how it is set to transparent 

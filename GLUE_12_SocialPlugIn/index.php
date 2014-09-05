@@ -26,7 +26,7 @@ require_once '../ARELLibrary/arel_xmlhelper.class.php';
 
 //use the Arel Helper to start the output with arel
 //start output
-ArelXMLHelper::start(NULL, "arel/index.php", "http://www.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip");
+ArelXMLHelper::start(NULL, "arel/index.php", "http://dev.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip");
 
 //end the output
 ArelXMLHelper::end();

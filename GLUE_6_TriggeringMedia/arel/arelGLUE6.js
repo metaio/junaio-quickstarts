@@ -23,10 +23,10 @@ function trackingHandler(type, param)
 			if(param[0].getCoordinateSystemID() == 1)
 				arel.Media.openWebsite("http://dev.junaio.com");
 			else if(param[0].getCoordinateSystemID() == 2)
-				arel.Media.startVideo("http://www.junaio.com/publisherDownload/tutorial/movie.mp4");
+				arel.Media.startVideo("http://dev.junaio.com/publisherDownload/tutorial/movie.mp4");
 			else if(param[0].getCoordinateSystemID() == 3)
 			{
-				arel.Media.startSound("http://www.junaio.com/publisherDownload/tutorial/test.mp3");
+				arel.Media.startSound("http://dev.junaio.com/publisherDownload/tutorial/test.mp3");
 				$('#info').html("Sound is playing now ;)");
 			}
 		}		
