@@ -33,7 +33,7 @@ function handleCustomPoiEvent(obj, type, param)
 function handlePoiSoundEvent(obj, type, param)
 {
     //check if there is tracking information available
-    if(type && type === arel.Events.Object.ONTOUCHSTARTED)
+    if(type && type === arel.Events.Object.ONTOUCHENDED)
     {
         arel.Media.startSound("http://dev.junaio.com/publisherDownload/tutorial/test.mp3");
     }

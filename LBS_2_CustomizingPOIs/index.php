@@ -25,7 +25,7 @@ ArelXMLHelper::start(NULL, "/arel/index.html", ArelXMLHelper::TRACKING_GPS);
 $oObject = ArelXMLHelper::createLocationBasedPOI(
 		"1", //id
 		"Hello Sound POI", //title
-		array(48.12310, 11.218648, 0), //location
+		array(38.12310, 11.218648, 0), //location
 		"/resources/thumb_sound.png", //thumb
 		"/resources/icon_sound.png", //icon
 		"This is our Sound POI", //description
@@ -84,7 +84,7 @@ ArelXMLHelper::outputObject($oObject);
 $oObject = ArelXMLHelper::createLocationBasedPOI(
     "5", //id
     "Do Phone Call", //title
-    array(48.12302,11.218644,0), //location
+    array(28.12302,11.218644,0), //location
     "/resources/thumb_custom.png", //thumb
     "/resources/icon_custom.png", //icon
     array()
