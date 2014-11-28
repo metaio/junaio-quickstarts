@@ -30,13 +30,13 @@ require_once '../ARELLibrary/arel_xmlhelper.class.php';
 //use the Arel Helper to start the output with arel
 
 //start output
-ArelXMLHelper::start(NULL, "/arel/index.html", "http://www.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip");
+ArelXMLHelper::start(NULL, "/arel/index.html", "assets/tracking_tutorial.zip");
 
 //return the metaio man on coordinate system 1 / reference image 1
 $oObject = ArelXMLHelper::createGLUEModel3D(
 		"1",	//ID 
-	"http://dev.junaio.com/publisherDownload/tutorial/metaioman.md2", //model Path 
-	"http://dev.junaio.com/publisherDownload/tutorial/metaioman.png", //texture Path
+	"assets/metaioman.md2", //model Path
+	"assets/metaioman.png", //texture Path
 	array(0,-100,0), //translation
 	array(3,3,3), //scale
 	new ArelRotation(ArelRotation::ROTATION_EULERDEG, array(-90,0,0)), //rotation
