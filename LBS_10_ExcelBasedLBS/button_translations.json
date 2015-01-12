@@ -1,0 +1,76 @@
+{
+    "en":{
+        "BTN_CALL":"Call",
+        "BTN_OPEN_WEB":"Open Website",
+        "BTN_ROUTE":"Route",
+        "BTN_MORE_INFO":"More Info",
+        "BTN_VIEW_IMAGE":"View Image",
+        "BTN_PLAY_VIDEO": "Play Video"
+    },
+    "de":{
+        "BTN_CALL":"Anruf",
+        "BTN_OPEN_WEB":"Website öffnen",
+        "BTN_ROUTE":"Route",
+        "BTN_MORE_INFO":"Weitere Informationen",
+		"BTN_VIEW_IMAGE":"Bild anzeigen",
+        "BTN_PLAY_VIDEO": "Video abspielen"
+    },
+    "es":{
+        "BTN_CALL":"llamada",
+        "BTN_OPEN_WEB":"Abrir sitio web",
+        "BTN_ROUTE":"Ruta",
+        "BTN_MORE_INFO":"Más información",
+		"BTN_VIEW_IMAGE":"Ver imagen",
+        "BTN_PLAY_VIDEO": "Reproducir Video"
+    },
+    "ja":{
+        "BTN_CALL":"コール",
+        "BTN_OPEN_WEB":"ウエブを開く",
+        "BTN_ROUTE":"ルート",
+        "BTN_MORE_INFO":"詳細情報",
+		"BTN_VIEW_IMAGE":"イメージ",
+        "BTN_PLAY_VIDEO": "動画再生"
+    },
+    "ru":{
+        "BTN_CALL":"вызов",
+        "BTN_OPEN_WEB":"Открыть WEB",
+        "BTN_ROUTE":"Маршрут",
+        "BTN_MORE_INFO":"Дополнительная информация",
+        "BTN_PLAY_VIDEO": "Проиграть Видео"
+    },
+    "zh":{
+        "BTN_CALL":"通话",
+        "BTN_OPEN_WEB":"開啓網路",
+        "BTN_ROUTE":"規劃路線",
+        "BTN_MORE_INFO":"更多信息",
+        "BTN_PLAY_VIDEO": "播放影片"
+    },
+    "id":{
+        "BTN_CALL":"panggilan",
+        "BTN_OPEN_WEB":"Buka Web",
+        "BTN_ROUTE":"Route",
+        "BTN_MORE_INFO":"Informasi Lebih Lanjut",
+        "BTN_PLAY_VIDEO": "Play Video"
+    },
+    "fr":{
+        "BTN_CALL":"appel",
+        "BTN_OPEN_WEB":"Ouvrir sur le web",
+        "BTN_ROUTE":"Itinéraire",
+        "BTN_MORE_INFO":"plus d'informations",
+        "BTN_PLAY_VIDEO": "Démarrer la video"
+    },
+    "it":{
+        "BTN_CALL":"chiamata",
+        "BTN_OPEN_WEB":"Apri sito web",
+        "BTN_ROUTE":"Itinerario",
+        "BTN_MORE_INFO":"Ulteriori informazioni",
+        "BTN_PLAY_VIDEO": "Guarda video"
+    },
+    "el":{
+        "BTN_CALL":"κλήση",
+        "BTN_OPEN_WEB":"Άνοιγμα Διαδικτύου",
+        "BTN_ROUTE":"Διαδρομή",
+        "BTN_MORE_INFO":"περισσότερες πληροφορίες",
+        "BTN_PLAY_VIDEO": "Αναπαραγωγή Βίντεο"
+    }
+}
