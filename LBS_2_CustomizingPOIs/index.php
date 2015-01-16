@@ -57,7 +57,7 @@ $oObject = ArelXMLHelper::createLocationBasedPOI(
 		"/resources/thumb_video.png", //thumb
 		"/resources/icon_video.png", //icon
 		"This is our Video POI", //description
-		array(array("Start Movie", "movieButton", "http://www.junaio.com/publisherDownload/tutorial/movie.mp4")) //buttons
+		array(array("Start Movie", "movieButton", "http://dev.junaio.com/publisherDownload/tutorial/movie.mp4")) //buttons
 	);
 
 //output the object

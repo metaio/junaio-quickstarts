@@ -27,7 +27,7 @@ $oObject = ArelXMLHelper::createLocationBasedPOI(
 		"/resources/thumb_sound.png", //thumb
 		"/resources/icon_sound.png", //icon
 		"This is our Sound POI", //description
-		array(array("Start Audio", "soundButton", "javascript: startSound(\"http://www.junaio.com/publisherDownload/tutorial/test.mp3\")")) //buttons
+		array(array("Start Audio", "soundButton", "javascript: startSound(\"http://dev.junaio.com/publisherDownload/tutorial/test.mp3\")")) //buttons
 	);
 
 //output the object
@@ -55,7 +55,7 @@ $oObject = ArelXMLHelper::createLocationBasedPOI(
 		"/resources/thumb_video.png", //thumb
 		"/resources/icon_video.png", //icon
 		"This is our Video POI", //description
-		array(array("Start Movie", "movieButton", "javascript: startVideo(\"http://www.junaio.com/publisherDownload/tutorial/movie.mp4\")")) //buttons
+		array(array("Start Movie", "movieButton", "javascript: startVideo(\"http://dev.junaio.com/publisherDownload/tutorial/movie.mp4\")")) //buttons
 	);
 
 //output the object

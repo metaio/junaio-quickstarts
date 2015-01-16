@@ -3,6 +3,9 @@
 require_once 'Zend/Http/Client.php';
 require_once 'Zend/Http/Response.php';
 
+define('SHORT_OPERATION_TIMEOUT', 8);
+define('LONG_OPERATION_TIMEOUT', 30);
+
 /**
  * Makes a POST-request to the Visual Search Database REST-API
  * @param string $url the name of the php-file which handles a specific REST-API request.
@@ -14,16 +17,23 @@ require_once 'Zend/Http/Response.php';
  */
 function doPost($url, $config, $params, $localFile = NULL, $fileUploadFormName = NULL)
 {
-	$client = new Zend_Http_Client("https://my.metaio.com/REST/VisualSearch/".$url, $config);
-	$client->setMethod(Zend_Http_Client::POST);
-	$client->setParameterPost($params);
-	if($localFile)
+	try
 	{
-		// Upload item to database
-		$client->setFileUpload($localFile, $fileUploadFormName);
+		$client = new Zend_Http_Client("https://my.metaio.com/REST/VisualSearch/".$url, $config);
+		$client->setMethod(Zend_Http_Client::POST);
+		$client->setParameterPost($params);
+		if($localFile)
+		{
+			// Upload item to database
+			$client->setFileUpload($localFile, $fileUploadFormName);
+		}
+		
+		$response = $client->request();
 	}
-
-	$response = $client->request();
+	catch (Exception $e)
+	{
+		$response = new Zend_Http_Response('Client side exception', array(), "", '1.1', PHP_EOL. 'Exception: ' . $e->getMessage() . PHP_EOL);
+	}
 
 	return $response;
 }
@@ -40,7 +50,7 @@ function addDatabase($email, $password, $dbName)
 	$postResponse = doPost
 	(
 		"addDatabase.php", 
-		array('timeout' => 15),
+		array('timeout' => SHORT_OPERATION_TIMEOUT),
 		array
 		(
             'email' => $email,
@@ -63,7 +73,7 @@ function deleteDatabase($email, $password, $dbName)
     $postResponse = doPost
     (
         "deleteDatabase.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
         (
             'email' => $email,
@@ -85,7 +95,7 @@ function getDatabases($email, $password)
     $postResponse = doPost
     (
         "getDatabases.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
         (
             'email' => $email,
@@ -108,7 +118,7 @@ function addApplication($email, $password, $dbName, $appId)
     $postResponse = doPost
 	(
         "addApplication.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
 		(
             'email' => $email,
@@ -135,7 +145,7 @@ function addChannel($email, $password, $dbName, $channelID)
     $postResponse = doPost
 	(
         "addApplication.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
 		(
             'email' => $email,
@@ -151,7 +161,7 @@ function addChannel($email, $password, $dbName, $channelID)
         $postResponse = doPost
         (
             "addApplication.php",
-            array('timeout' => 15),
+            array('timeout' => SHORT_OPERATION_TIMEOUT),
             array
             (
                 'email' => $email,
@@ -179,7 +189,7 @@ function deleteApplication($email, $password, $dbName, $appId)
     $postResponse = doPost
 	(
         "deleteApplication.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
 		(
             'email' => $email,
@@ -206,7 +216,7 @@ function deleteChannel($email, $password, $dbName, $channelID)
     $postResponse = doPost
 	(
         "deleteApplication.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
 		(
             'email' => $email,
@@ -222,7 +232,7 @@ function deleteChannel($email, $password, $dbName, $channelID)
         $postResponse = doPost
         (
             "deleteApplication.php",
-            array('timeout' => 15),
+            array('timeout' => SHORT_OPERATION_TIMEOUT),
             array
             (
                 'email' => $email,
@@ -268,7 +278,7 @@ function addItem($email, $password, $dbName, $item, $identifier, $metadata)
     $postResponse = doPost
 	(
         "addItem.php",
-        array('timeout' => 15),
+        array('timeout' => LONG_OPERATION_TIMEOUT),
         $params,
         $item,
 		"item"
@@ -289,7 +299,7 @@ function addTrackingData($email, $password, $dbName, $trackable)
     $postResponse = doPost
 	(
         "addTrackingData.php",
-        array('timeout' => 15),
+        array('timeout' => LONG_OPERATION_TIMEOUT),
         array
 		(
             'email' => $email,
@@ -315,7 +325,7 @@ function removeItem($email, $password, $dbName, $itemName)
     $postResponse = doPost
 	(
         "removeItem.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
 		(
             'email' => $email,
@@ -340,7 +350,7 @@ function deleteTrackingDatas($email, $password, $dbName, $tdNames)
     $postResponse = doPost
 	(
         "deleteTrackingDatas.php",
-        array('timeout' => 15),
+        array('timeout' => SHORT_OPERATION_TIMEOUT),
         array
 		(
             'email' => $email,
@@ -364,7 +374,7 @@ function getItems($email, $password, $dbName)
 	$postResponse = doPost
 	(
 		"getItems.php", 
-		array('timeout' => 15),
+		array('timeout' => SHORT_OPERATION_TIMEOUT),
 		array
 		(
             'email' => $email,
@@ -387,7 +397,7 @@ function getTrackingDatas($email, $password, $dbName)
 	$postResponse = doPost
 	(
 		"getTrackingDatas.php", 
-		array('timeout' => 15),
+		array('timeout' => SHORT_OPERATION_TIMEOUT),
 		array
 		(
             'email' => $email,
@@ -410,7 +420,7 @@ function getStats($email, $password, $dbName)
 	$postResponse = doPost
 	(
 		"getStats.php", 
-		array('timeout' => 15),
+		array('timeout' => SHORT_OPERATION_TIMEOUT),
 		array
 		(
             'email' => $email,
@@ -643,6 +653,8 @@ function isError($body)
 function printResult($response, $failMsg, $successMsg, $printWholeBody = false)
 {
     $myXml = new SimpleXMLElement($response->getBody());
+	
+	$msg = "";
 
     if ($printWholeBody)
     {

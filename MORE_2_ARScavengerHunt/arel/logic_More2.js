@@ -12,7 +12,7 @@ arel.sceneReady(function()
 function TreasureHunt()
 {
 	//the tracking configuration needed to scan an image
-	this.trackingConfiguration = "http://www.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip";
+	this.trackingConfiguration = "http://dev.junaio.com/publisherDownload/tutorial/tracking_tutorial.zip";
 	//are we currently in GPS mode
 	this.currentlyGPS = true;
 	//what is the current location
