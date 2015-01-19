@@ -3,8 +3,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 require_once 'jsonTranslator.php';
-require_once 'ARELLibrary/arel_object.class.php';
-require_once 'ARELLibrary/arel_xmlhelper.class.php';
+require_once '../ARELLibrary/arel_object.class.php';
+require_once '../ARELLibrary/arel_xmlhelper.class.php';
 
 define('WWW_ROOT', "http://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']));
 define('LANGUAGE_INFO', WWW_ROOT.'/button_translations.json');
