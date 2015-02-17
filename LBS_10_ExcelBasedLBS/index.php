@@ -87,7 +87,7 @@ function fetch_relevant_pois($lat, $lon, $dbname) {
     $db->createFunction('DISTANCE', 'sqlite3_distance_func', 4);
 
     //run a proximity query to fetch ONLY close by POIs
-    $records=$db->query("SELECT * FROM POIsM WHERE DISTANCE(latitude,longitude,$lat,$lon) < 50;");
+    $records=$db->query("SELECT * FROM POIsM WHERE DISTANCE(latitude,longitude,$lat,$lon) < 50 ORDER BY abs(latitude - $lat) + abs(longitude - $lon);");
 
     //build an AREL XML with the relevant POIs
 
@@ -118,7 +118,7 @@ function fetch_all_pois($dbname) {
  */
 function build_xml($pois, $lang = "en") {
     $array_objects = array();
-    $array_buttons = array();
+
     //Loop through all the results from query and create POI objects
     while($row = $pois->fetchArray()){
         //Create ArelObjectPOI using AREL Library.
@@ -129,6 +129,7 @@ function build_xml($pois, $lang = "en") {
         $obj->setThumbnail($row['thumbnailURL']);
         $obj->setIcon($row['iconURL']);
         //Create localized buttons. The localized string are in "jsonTranslator.php" file.
+        $array_buttons = array();
         if ($row['phoneNumber'] != "") {
             array_push($array_buttons, array('BTN_CALL', 'Call', 'tel:'.$row['phoneNumber']));
         }
@@ -156,6 +157,12 @@ function build_xml($pois, $lang = "en") {
 
         array_push($array_objects, $obj);
     }
+
+    $log_file = fopen("logFile.log","a");
+    //Write to file how many POIs have been retrieved
+    fwrite($log_file,"Total POIs retrieved from sqlite database: ".count($array_objects).".\n");
+    fclose($log_file);
+
     //call function to create XML response using AREL Library
     createLocationBasedAREL($array_objects, $lang);
 }
