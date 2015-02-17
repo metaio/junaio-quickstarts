@@ -87,13 +87,18 @@ function save_pois($jsonStr, $dbname) {
 $header_array = array("id", "title", "description", "phoneNumber", "homepage", "iconURL", "thumbnailURL", "imageURL", "videoURL", "soundURL", "modelURL",
     "latitude", "longitude", "altitude");
 
+$log_file = fopen("logFile.log","a");
+
 //Open CSV file in read mode
-$file = fopen('pois_m.csv', 'r');
+$file = fopen('POIs_m.csv', 'r');
 
 //Initialize creation of JSON string
 $json = '{"pois": [';
 
 $line = fgetcsv($file); //Its header, we don't need it.
+
+//Counter to maintain count of how many POIs have been read from CSV file.
+$counter = 0;
 
 //Loop through all the lines of CSV file. Parse it and create json string
 while (($line = fgetcsv($file)) !== false)
@@ -104,10 +109,15 @@ while (($line = fgetcsv($file)) !== false)
     }
     $json = substr($json, 0, -1);
     $json = $json."},";
+    $counter = $counter + 1;
 }
 
 $json = substr($json, 0, -1);
 $json = $json."]}";
+
+//Write to file how many POIs have been retrieved
+echo fwrite($log_file,"Total Lines read from CSV file: ".$counter.".\n");
+fclose($log_file);
 
 //Close the file
 fclose($file);
