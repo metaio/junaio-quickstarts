@@ -7,7 +7,6 @@ require_once '../ARELLibrary/arel_object.class.php';
 require_once '../ARELLibrary/arel_xmlhelper.class.php';
 
 define('WWW_ROOT', "http://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']));
-define('LANGUAGE_INFO', WWW_ROOT.'/button_translations.json');
 
 /**
  * This function is wrapper on the ARELXMLHelper class to offer localization and make POIs creation process easy
@@ -160,8 +159,10 @@ function build_xml($pois, $lang = "en") {
 
     $log_file = fopen("logFile.log","a");
     //Write to file how many POIs have been retrieved
-    fwrite($log_file,"Total POIs retrieved from sqlite database: ".count($array_objects).".\n");
-    fclose($log_file);
+    if($log_file) {
+        fwrite($log_file,"Total POIs retrieved from sqlite database: ".count($array_objects).".\n");
+        fclose($log_file);
+    }
 
     //call function to create XML response using AREL Library
     createLocationBasedAREL($array_objects, $lang);

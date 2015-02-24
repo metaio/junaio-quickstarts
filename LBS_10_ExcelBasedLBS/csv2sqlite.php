@@ -116,8 +116,10 @@ $json = substr($json, 0, -1);
 $json = $json."]}";
 
 //Write to file how many POIs have been retrieved
-echo fwrite($log_file,"Total Lines read from CSV file: ".$counter.".\n");
-fclose($log_file);
+if ($log_file) {
+    fwrite($log_file,"Total Lines read from CSV file: ".$counter.".\n");
+    fclose($log_file);
+}
 
 //Close the file
 fclose($file);
