@@ -78,7 +78,7 @@ function fetch_relevant_pois($lat, $lon, $dbname) {
     if (is_null($lat) || is_null($lon))
     {
         // Return empty result.
-        ArelXMLHelper::createLocationBasedAREL(array());
+        createLocationBasedAREL(array());
         return null;
     }
 
