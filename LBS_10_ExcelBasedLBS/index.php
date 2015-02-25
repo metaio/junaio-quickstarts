@@ -1,7 +1,5 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
 require_once 'jsonTranslator.php';
 require_once '../ARELLibrary/arel_object.class.php';
 require_once '../ARELLibrary/arel_xmlhelper.class.php';
