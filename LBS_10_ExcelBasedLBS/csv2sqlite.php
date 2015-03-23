@@ -5,8 +5,8 @@
  * Date: 22/12/14
  * Time: 10:55
  */
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+//error_reporting(E_ALL);
+//ini_set('display_errors', '1');
 function save_pois($jsonStr, $dbname) {
     //create or open the channel database
     $db = new SQLite3($dbname, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
@@ -116,8 +116,10 @@ $json = substr($json, 0, -1);
 $json = $json."]}";
 
 //Write to file how many POIs have been retrieved
-echo fwrite($log_file,"Total Lines read from CSV file: ".$counter.".\n");
-fclose($log_file);
+if ($log_file) {
+    fwrite($log_file,"Total Lines read from CSV file: ".$counter.".\n");
+    fclose($log_file);
+}
 
 //Close the file
 fclose($file);
